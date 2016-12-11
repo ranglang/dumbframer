@@ -32,6 +32,7 @@ object Main {
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
 
     val definitions = parseDefinitions(readerForFile(inputFileName))
+    Console.println(definitions);
 
     val output = new PrintWriter(new BufferedWriter(
         new FileWriter(outputFileName)))

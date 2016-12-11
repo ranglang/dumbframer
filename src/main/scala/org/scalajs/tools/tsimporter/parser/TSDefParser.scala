@@ -42,7 +42,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "declare", "module", "type", "namespace",
 
     // keywords of framerjs
-    "Layer"
+    "Layer", "width","x"
   )
 
   lexical.delimiters ++= List(
@@ -80,16 +80,21 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   )
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-//      ambientModuleDecl | ambientVarDecl | ambientFunctionDecl
-//    | ambientEnumDecl | ambientClassDecl | ambientInterfaceDecl
-//    |
       framerLayerDecl
-//    | typeAliasDecl
   )
 
   lazy val framerLayerDecl: Parser[DeclTree] =
-//  identifier <~ "="  <~ "new" <~ "Layer"  <~ opt(";") ^^ LayerDecl
-  identifier <~ "=" <~ "new" <~ "Layer" ^^ LayerDecl
+  identifier ~ ("="  ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
+
+  lazy val parameterBody : Parser[List[TermTree]] =
+//  rep1sep(paraType,paraType)
+  rep(paraType)
+//     repsep("width" ~> ":" ~> numericLit ^^ WidthIdent, ",")
+
+  lazy val paraType :  Parser[TermTree]  =
+    "width" ~> ":" ~> numericLit ^^ WidthIdent |
+    "x" ~> ":" ~> numericLit ^^ XIdent
+
 
   lazy val ambientVarDecl: Parser[DeclTree] =
     "var" ~> identifier ~ optTypeAnnotation <~ opt(";") ^^ VarDecl

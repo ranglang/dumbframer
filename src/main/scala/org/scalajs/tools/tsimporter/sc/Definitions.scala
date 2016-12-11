@@ -5,10 +5,10 @@
 
 package org.scalajs.tools.tsimporter.sc
 
+import org.scalajs.tools.tsimporter.Trees.TermTree
+
 import scala.language.implicitConversions
-
 import scala.collection.mutable._
-
 import org.scalajs.tools.tsimporter.Utils
 
 case class Name(name: String) {
@@ -186,9 +186,7 @@ class ModuleSymbol(nme: Name) extends ContainerSymbol(nme) {
   override def toString() = s"object $name"
 }
 
-class LayerSymbol(nme: Name) extends Symbol(nme) {
-
-
+case class LayerSymbol(nme: Name, params: List[TermTree]) extends Symbol(nme) {
 }
 
 class TypeAliasSymbol(nme: Name) extends Symbol(nme) {

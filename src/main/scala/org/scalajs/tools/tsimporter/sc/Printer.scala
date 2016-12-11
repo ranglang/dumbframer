@@ -7,6 +7,8 @@ package org.scalajs.tools.tsimporter.sc
 
 import java.io.PrintWriter
 
+import org.scalajs.tools.tsimporter.Trees.WidthIdent
+
 class Printer(private val output: PrintWriter, outputPackage: String) {
   import Printer._
 
@@ -18,9 +20,17 @@ class Printer(private val output: PrintWriter, outputPackage: String) {
     val name = sym.name
     sym match {
 
-      case layer: LayerSymbol =>
+      case layer: LayerSymbol => {
+        Console.println(layer.params);
         val a = "\""+layer.name+"\""
         pln"<div class=${a}></div>"
+                for (para <- layer.params) {
+                  para match {
+                    case w: WidthIdent => Console.println("width:"+ w.value)
+                    case _ => Console.println("..")
+                  }
+                }
+      }
 
       case comment: CommentSymbol =>
         pln"/* ${comment.text} */"

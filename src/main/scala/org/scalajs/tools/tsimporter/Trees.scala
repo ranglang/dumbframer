@@ -44,6 +44,14 @@ object Trees {
       Some(tree.name)
   }
 
+  case class WidthIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "width"
+  }
+
+  case class XIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "x"
+  }
+
   case class Ident(name: String) extends Tree with PropertyName {
     Ident.requireValidIdent(name)
   }
@@ -68,7 +76,10 @@ object Trees {
 
   case class VarDecl(name: Ident, tpe: Option[TypeTree]) extends DeclTree
 
-  case class LayerDecl(name: Ident) extends DeclTree
+  case class WidthDecl(value: String) extends DeclTree
+
+  case class LayerDecl(name: Ident, members: List[TermTree]) extends DeclTree
+
 
   case class FunctionDecl(name: Ident, signature: FunSignature) extends DeclTree
 
