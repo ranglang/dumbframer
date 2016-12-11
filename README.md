@@ -1,21 +1,26 @@
-# Importer from TypeScript type definitions to Scala.js
+#  What is DumbFramer?
 
-This tool reads type definitions files written for
-[TypeScript](http://www.typescriptlang.org/) (.d.ts files) and rewrites them to
-.scala files usable with
-[Scala.js](http://www.scala-js.org/).
+Note: Work in progress
 
-The process is not 100 % accurate, so manual editing is often needed
-afterwards. This can be improved, but not to perfection, because the features
-offered by the type systems of TypeScript and Scala.js differ in some subtle
-ways.
+This tool reads coffeeScript files from [FramerJS](https://github.com/koenbok/Framer).
+and convert it into files of html add css .
+
+```
+imageLayer = new Layer({width:128, height:128, image:"images/icon.png"})
+imageLayer.center()
+imageLayer.states = {
+    second: {y:100, scale:0.6, rotationZ:100},
+    third:  {y:300, scale:1.3},
+    fourth: {y:200, scale:0.9, rotationZ:200}
+}
+```coffeeScript
 
 ## Usage
 
-    $ sbt 'run somelib.d.ts SomeLib.scala'
+    $ sbt 'run'
 
 ## License
 
-The TypeScript Importer for Scala.js is distributed under the
+DumbFramer is distributed under the
 [Scala License](http://www.scala-lang.org/license.html).
 =======

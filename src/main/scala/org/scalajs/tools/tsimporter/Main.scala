@@ -28,7 +28,7 @@ object Main {
 //    }
 
     val inputFileName = "1.ts"
-    val outputFileName = "1.scala"
+    val outputFileName = "input.html"
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
 
     val definitions = parseDefinitions(readerForFile(inputFileName))
