@@ -12,7 +12,9 @@ import sc._
  *  It reads the TypeScript AST and produces (hopefully) equivalent Scala
  *  code.
  */
-class Importer(val output: java.io.PrintWriter) {
+class Importer(val output: java.io.PrintWriter,
+              val output1: java.io.PrintWriter
+              ) {
   import Importer._
 
   /** Entry point */
@@ -22,7 +24,7 @@ class Importer(val output: java.io.PrintWriter) {
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
 
-    new Printer(output, outputPackage).printSymbol(rootPackage)
+    new Printer(output, output1,outputPackage).printSymbol(rootPackage)
   }
 
   private def processDecl(owner: ContainerSymbol, declaration: DeclTree) {
@@ -101,18 +103,25 @@ class Importer(val output: java.io.PrintWriter) {
         processDefDecl(owner, name, signature)
 
       case LayerDecl(IdentName(name), params) =>
-        Console.println("LayerDecl:"+name);
         val parentOpt:Option[ParentIdent] = params.collectFirst{
           case cat: ParentIdent => cat
         }
-        Console.println(parentOpt);
+
+        val htmlOpt  = params.collectFirst{
+          case str: HtmlIdent => str
+        }
+
+        val contaner = htmlOpt match {
+          case Some(html) => new TextSymbol(name, html.value, params)
+          case None => new LayerSymbol(name,params);
+        }
+
         parentOpt match {
           case Some(parentIdent) =>
-            owner.getLayer(Name(parentIdent.value.name)).members +=
-               new LayerSymbol(name,params);
+            owner.getLayer(Name(parentIdent.value.name)).members += contaner
           case None =>
             Console.println("None => "+name)
-             owner.members += new LayerSymbol(name,params);
+             owner.members += contaner
         }
       case _ =>
         owner.members += new CommentSymbol("??? "+declaration)

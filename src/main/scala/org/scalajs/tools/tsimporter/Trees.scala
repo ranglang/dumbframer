@@ -8,7 +8,6 @@ package org.scalajs.tools.tsimporter
 import scala.util.parsing.input.Positional
 
 object Trees {
-  // Tree
 
   abstract sealed class Tree extends Positional {
     /*override def toString() = {
@@ -44,12 +43,32 @@ object Trees {
       Some(tree.name)
   }
 
+  case class StyleIdent(paraName: String, paraValue: String) extends TermTree with PropertyName {
+    override def name: String = "html"
+  }
+
+  case class HtmlIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "html"
+  }
+
   case class ParentIdent(value: Ident) extends TermTree with PropertyName {
     override def name: String = "parent"
   }
 
   case class WidthIdent(value: String) extends TermTree with PropertyName {
     override def name: String = "width"
+  }
+
+  case class BackGroundColorIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "backgroundColor"
+  }
+
+  case class HeightIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "width"
+  }
+
+  case class YIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "y"
   }
 
   case class XIdent(value: String) extends TermTree with PropertyName {

@@ -196,7 +196,10 @@ class ModuleSymbol(nme: Name) extends ContainerSymbol(nme) {
   override def toString() = s"object $name"
 }
 
-case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[LayerSymbol] = ListBuffer()) extends Symbol(nme) {
+case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends Symbol(nme) {
+}
+
+case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }
 
 class TypeAliasSymbol(nme: Name) extends Symbol(nme) {

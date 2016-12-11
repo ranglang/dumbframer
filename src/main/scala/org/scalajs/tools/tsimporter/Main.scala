@@ -28,7 +28,8 @@ object Main {
 //    }
 
     val inputFileName = "1.ts"
-    val outputFileName = "input.html"
+    val outputFileName = "out.html"
+    val outputFileName1 = "out.css"
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
 
     val definitions = parseDefinitions(readerForFile(inputFileName))
@@ -36,16 +37,21 @@ object Main {
 
     val output = new PrintWriter(new BufferedWriter(
         new FileWriter(outputFileName)))
+    val output1 = new PrintWriter(new BufferedWriter(
+      new FileWriter(outputFileName1)))
     try {
-      process(definitions, output, outputPackage)
+      process(definitions, output, output1, outputPackage)
     } finally {
       output.close()
+      output1.close();
     }
   }
 
-  private def process(definitions: List[DeclTree], output: PrintWriter,
+  private def process(definitions: List[DeclTree],
+                      output: PrintWriter,
+                      output1: PrintWriter,
       outputPackage: String) {
-    new Importer(output)(definitions, outputPackage)
+    new Importer(output,output1)(definitions, outputPackage)
   }
 
   private def parseDefinitions(reader: Reader[Char]): List[DeclTree] = {

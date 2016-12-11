@@ -40,9 +40,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
       // Additional keywords of TypeScript
       "declare", "module", "type", "namespace",
-
     // keywords of framerjs
-    "Layer", "width","x","parent"
+    "Layer",
+    "width",
+    "x",
+    "y",
+    "html","style",
+    "parent","height", "backgroundColor"
   )
 
   lexical.delimiters ++= List(
@@ -89,10 +93,18 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val parameterBody : Parser[List[TermTree]] =
     rep(paraType)
 
+  lazy val styleParaType :  Parser[TermTree]  =
+    stringLit ~ ( ":" ~> stringLit) ^^ StyleIdent
+
   lazy val paraType :  Parser[TermTree]  =
     "width" ~> ":" ~> numericLit ^^ WidthIdent |
+      "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
     "x" ~> ":" ~> numericLit ^^ XIdent |
-  "parent" ~> ":" ~> identifier ^^ ParentIdent
+      "y" ~> ":" ~> numericLit ^^ YIdent |
+      "html" ~> ":" ~> stringLit ^^ HtmlIdent |
+  "parent" ~> ":" ~> identifier ^^ ParentIdent |
+  "height" ~> ":" ~> numericLit ^^ HeightIdent |
+  "style" ~> ":" ~> styleParaType
 
 
   lazy val ambientVarDecl: Parser[DeclTree] =
