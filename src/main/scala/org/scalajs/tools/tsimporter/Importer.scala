@@ -101,8 +101,19 @@ class Importer(val output: java.io.PrintWriter) {
         processDefDecl(owner, name, signature)
 
       case LayerDecl(IdentName(name), params) =>
-        owner.members += new LayerSymbol(name,params);
-
+        Console.println("LayerDecl:"+name);
+        val parentOpt:Option[ParentIdent] = params.collectFirst{
+          case cat: ParentIdent => cat
+        }
+        Console.println(parentOpt);
+        parentOpt match {
+          case Some(parentIdent) =>
+            owner.getLayer(Name(parentIdent.value.name)).members +=
+               new LayerSymbol(name,params);
+          case None =>
+            Console.println("None => "+name)
+             owner.members += new LayerSymbol(name,params);
+        }
       case _ =>
         owner.members += new CommentSymbol("??? "+declaration)
     }

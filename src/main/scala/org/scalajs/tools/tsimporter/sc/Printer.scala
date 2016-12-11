@@ -21,9 +21,14 @@ class Printer(private val output: PrintWriter, outputPackage: String) {
     sym match {
 
       case layer: LayerSymbol => {
-        Console.println(layer.params);
+        Console.println("/////////////");
+        Console.println(layer);
         val a = "\""+layer.name+"\""
-        pln"<div class=${a}></div>"
+        pln"<div class=${a}>"
+        for(member <- layer.members){
+          printSymbol(member)
+        }
+        pln"</div>"
                 for (para <- layer.params) {
                   para match {
                     case w: WidthIdent => Console.println("width:"+ w.value)

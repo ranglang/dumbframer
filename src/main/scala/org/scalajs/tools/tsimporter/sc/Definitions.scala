@@ -112,6 +112,16 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
     }
   }
 
+  def getLayer(name: Name): LayerSymbol = {
+    Console.println(members)
+    Console.println(members.head.name);
+    Console.println("getLayer"+name);
+      val optMembers = members.collectFirst {
+        case sym: LayerSymbol if sym.name == name => sym
+      }
+    optMembers.get
+  }
+
   def getModuleOrCreate(name: Name): ModuleSymbol = {
     findModule(name) getOrElse {
       val result = new ModuleSymbol(name)
@@ -186,7 +196,7 @@ class ModuleSymbol(nme: Name) extends ContainerSymbol(nme) {
   override def toString() = s"object $name"
 }
 
-case class LayerSymbol(nme: Name, params: List[TermTree]) extends Symbol(nme) {
+case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[LayerSymbol] = ListBuffer()) extends Symbol(nme) {
 }
 
 class TypeAliasSymbol(nme: Name) extends Symbol(nme) {
