@@ -44,6 +44,10 @@ object Trees {
       Some(tree.name)
   }
 
+  case class ParentIdent(value: Ident) extends TermTree with PropertyName {
+    override def name: String = "parent"
+  }
+
   case class WidthIdent(value: String) extends TermTree with PropertyName {
     override def name: String = "width"
   }
