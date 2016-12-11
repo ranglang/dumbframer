@@ -100,6 +100,9 @@ class Importer(val output: java.io.PrintWriter) {
       case FunctionDecl(IdentName(name), signature) =>
         processDefDecl(owner, name, signature)
 
+      case LayerDecl(IdentName(name)) =>
+        owner.members += new LayerSymbol(name);
+
       case _ =>
         owner.members += new CommentSymbol("??? "+declaration)
     }

@@ -17,6 +17,11 @@ class Printer(private val output: PrintWriter, outputPackage: String) {
   def printSymbol(sym: Symbol) {
     val name = sym.name
     sym match {
+
+      case layer: LayerSymbol =>
+        val a = "\""+layer.name+"\""
+        pln"<div class=${a}></div>"
+
       case comment: CommentSymbol =>
         pln"/* ${comment.text} */"
 

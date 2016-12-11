@@ -186,6 +186,11 @@ class ModuleSymbol(nme: Name) extends ContainerSymbol(nme) {
   override def toString() = s"object $name"
 }
 
+class LayerSymbol(nme: Name) extends Symbol(nme) {
+
+
+}
+
 class TypeAliasSymbol(nme: Name) extends Symbol(nme) {
   val tparams = new ListBuffer[TypeParamSymbol]
   var alias: TypeRef = TypeRef.Any

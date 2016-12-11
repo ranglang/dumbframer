@@ -26,6 +26,8 @@ object Trees {
   sealed trait TypeTree extends Tree
   sealed trait MemberTree extends Tree
 
+  sealed trait LayerTree extends Tree
+
   // Identifiers and properties
 
   sealed trait PropertyName extends TermTree {
@@ -65,6 +67,8 @@ object Trees {
   case class ModuleDecl(name: PropertyName, members: List[DeclTree]) extends DeclTree
 
   case class VarDecl(name: Ident, tpe: Option[TypeTree]) extends DeclTree
+
+  case class LayerDecl(name: Ident) extends DeclTree
 
   case class FunctionDecl(name: Ident, signature: FunSignature) extends DeclTree
 

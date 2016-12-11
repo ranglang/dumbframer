@@ -17,18 +17,18 @@ import parser.TSDefParser
 /** Entry point for the TypeScript importer of Scala.js */
 object Main {
   def main(args: Array[String]) {
-    if (args.length < 2) {
-      Console.err.println("""
-        |Usage: scalajs-ts-importer <input.d.ts> <output.scala> [<package>]
-        |  <input.d.ts>     TypeScript type definition file to read
-        |  <output.scala>   Output Scala.js file
-        |  <package>        Package name for the output (defaults to "importedjs")
-      """.stripMargin.trim)
-      System.exit(1)
-    }
+//    if (args.length < 2) {
+//      Console.err.println("""
+//        |Usage: scalajs-ts-importer <input.d.ts> <output.scala> [<package>]
+//        |  <input.d.ts>     TypeScript type definition file to read
+//        |  <output.scala>   Output Scala.js file
+//        |  <package>        Package name for the output (defaults to "importedjs")
+//      """.stripMargin.trim)
+//      System.exit(1)
+//    }
 
-    val inputFileName = args(0)
-    val outputFileName = args(1)
+    val inputFileName = "1.ts"
+    val outputFileName = "1.scala"
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
 
     val definitions = parseDefinitions(readerForFile(inputFileName))

@@ -39,7 +39,10 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "public", "static", "yield",
 
       // Additional keywords of TypeScript
-      "declare", "module", "type", "namespace"
+      "declare", "module", "type", "namespace",
+
+    // keywords of framerjs
+    "Layer"
   )
 
   lexical.delimiters ++= List(
@@ -77,10 +80,16 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   )
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-      ambientModuleDecl | ambientVarDecl | ambientFunctionDecl
-    | ambientEnumDecl | ambientClassDecl | ambientInterfaceDecl
-    | typeAliasDecl
+//      ambientModuleDecl | ambientVarDecl | ambientFunctionDecl
+//    | ambientEnumDecl | ambientClassDecl | ambientInterfaceDecl
+//    |
+      framerLayerDecl
+//    | typeAliasDecl
   )
+
+  lazy val framerLayerDecl: Parser[DeclTree] =
+//  identifier <~ "="  <~ "new" <~ "Layer"  <~ opt(";") ^^ LayerDecl
+  identifier <~ "=" <~ "new" <~ "Layer" ^^ LayerDecl
 
   lazy val ambientVarDecl: Parser[DeclTree] =
     "var" ~> identifier ~ optTypeAnnotation <~ opt(";") ^^ VarDecl
@@ -100,8 +109,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val ambientInterfaceDecl: Parser[DeclTree] =
     "interface" ~> typeName ~ tparams ~ intfInheritance ~ memberBlock <~ opt(";") ^^ InterfaceDecl
 
-  lazy val typeAliasDecl: Parser[DeclTree] =
-    "type" ~> typeName ~ tparams ~ ("=" ~> typeDesc) <~ opt(";") ^^ TypeAliasDecl
+//  lazy val typeAliasDecl: Parser[DeclTree] =
+//    "type" ~> typeName ~ tparams ~ ("=" ~> typeDesc) <~ opt(";") ^^ TypeAliasDecl
 
   lazy val tparams = (
       "<" ~> rep1sep(typeParam, ",") <~ ">"
@@ -260,10 +269,15 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val typeName =
     identifierName ^^ TypeName
 
-  lazy val identifierName = accept("IdentifierName", {
-    case lexical.Identifier(chars)                                  => chars
-    case lexical.Keyword(chars) if chars.forall(Character.isLetter) => chars
-  })
+  lazy val identifierName =
+    accept("IdentifierName", {
+      case lexical.Identifier(chars)                                  => chars
+      case lexical.Keyword(chars) if chars.forall(Character.isLetter) => chars
+      case a:Elem => {
+        Console.println(a);
+        ""
+      }
+    })
 
   lazy val propertyName: Parser[PropertyName] =
     identifier | stringLiteral
