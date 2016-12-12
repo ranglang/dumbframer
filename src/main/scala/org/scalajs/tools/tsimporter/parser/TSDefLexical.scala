@@ -103,6 +103,7 @@ class TSDefLexical extends Lexical with StdTokens with ImplicitConversions {
 
   def stringOf(p: => Parser[Char]): Parser[String] = rep(p) ^^ chars2string
   def stringOf1(p: => Parser[Char]): Parser[String] = rep1(p) ^^ chars2string
+
   def stringOf1(first: => Parser[Char], p: => Parser[Char]): Parser[String] =
     rep1(first, p) ^^ chars2string
 

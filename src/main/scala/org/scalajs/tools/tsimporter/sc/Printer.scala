@@ -18,6 +18,10 @@ class Printer(private val output: PrintWriter,
   def printTermPara(paras: List[TermTree]): Unit = {
     for (para <- paras) {
       para match {
+        case AnnotationIdent(file) =>
+            Console.println(file)
+//          val a = "\""+image.value +"\""
+//          plncss"backgroundImage:$a"
         case image: ImageIdent =>
           val a = "\""+image.value +"\""
           plncss"backgroundImage:$a"

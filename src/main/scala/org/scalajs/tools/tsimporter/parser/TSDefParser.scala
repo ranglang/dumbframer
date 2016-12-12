@@ -6,11 +6,6 @@
 package org.scalajs.tools.tsimporter.parser
 
 import org.scalajs.tools.tsimporter.Trees._
-
-import java.io.File
-
-import scala.collection.mutable.ListBuffer
-
 import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.token._
 import scala.util.parsing.combinator.syntactical._
@@ -40,21 +35,29 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
     // Additional keywords of TypeScript
     "declare", "module", "type", "namespace",
-    // keywords of framerjs
     "Layer",
     "width",
     "x",
     "y",
-    "html", "style",
-    "parent", "height", "backgroundColor",
-    "Align","center","left","right","image"
+    "html",
+    "style",
+    "parent",
+    "height",
+    "backgroundColor",
+    "Align",
+    "center",
+    "left",
+    "right",
+    "image"
+      ,"#",
+    "Import","file"
   )
 
   lexical.delimiters ++= List(
     "{", "}", "(", ")", "[", "]", "<", ">",
     ".", ";", ",", "?", ":", "=", "|",
     // TypeScript-specific
-    "...", "=>"
+    "...", "=>","#"
   )
 
   def parseDefinitions(input: Reader[Char]) =
@@ -66,27 +69,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val ambientDeclaration: Parser[DeclTree] =
     opt("declare") ~> opt("export") ~> moduleElementDecl1
 
-  lazy val ambientModuleDecl: Parser[DeclTree] =
-    ("module" | "namespace") ~> rep1sep(propertyName, ".") ~ moduleBody ^^ {
-      case nameParts ~ body =>
-        nameParts.init.foldRight(ModuleDecl(nameParts.last, body)) {
-          (name, inner) => ModuleDecl(name, inner :: Nil)
-        }
-    }
-
-  lazy val moduleBody: Parser[List[DeclTree]] =
-    "{" ~> rep(moduleElementDecl) <~ "}" ^^ (_.flatten)
-
-  lazy val moduleElementDecl: Parser[Option[DeclTree]] = (
-    "export" ~> (
-      moduleElementDecl1 ^^ (Some(_))
-        | "=" ~> identifier <~ ";" ^^^ None)
-      | moduleElementDecl1 ^^ (Some(_))
-    )
-
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-    framerLayerDecl
+    //    framerLayerDecl |
+    annotationDecl
     )
+
+  lazy val annotationDecl: Parser[DeclTree] =
+   "#" ~> "Import" ~>"file" ~>stringLit ^^ AnnotationIdent
 
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
@@ -98,7 +87,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val paraType: Parser[TermTree] =
     "width" ~> ":" ~> numericLit ^^ WidthIdent |
       "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
-      "x" ~> ":" ~> valueDecl ^^ XIdent | //(numericLit ^^ ValueIdent | "Align.center") ^^ XIdent |
+      "x" ~> ":" ~> valueDecl ^^ XIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
@@ -112,7 +101,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ AlignIdent |
-      "Align" ~> "." ~> ("center"|"left"|"right") ^^ AlignIdent
+      "Align" ~> "." ~> ("center" | "left" | "right") ^^ AlignIdent
       )
 
   lazy val ambientVarDecl: Parser[DeclTree] =
@@ -132,9 +121,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val ambientInterfaceDecl: Parser[DeclTree] =
     "interface" ~> typeName ~ tparams ~ intfInheritance ~ memberBlock <~ opt(";") ^^ InterfaceDecl
-
-  //  lazy val typeAliasDecl: Parser[DeclTree] =
-  //    "type" ~> typeName ~ tparams ~ ("=" ~> typeDesc) <~ opt(";") ^^ TypeAliasDecl
 
   lazy val tparams = (
     "<" ~> rep1sep(typeParam, ",") <~ ">"

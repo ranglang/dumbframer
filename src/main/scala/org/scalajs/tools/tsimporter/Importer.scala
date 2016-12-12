@@ -123,6 +123,7 @@ class Importer(val output: java.io.PrintWriter,
             Console.println("None => "+name)
              owner.members += contaner
         }
+      case AnnotationIdent(file) =>
       case _ =>
         owner.members += new CommentSymbol("??? "+declaration)
     }

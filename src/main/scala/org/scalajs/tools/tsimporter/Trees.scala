@@ -43,6 +43,10 @@ object Trees {
       Some(tree.name)
   }
 
+  case class AnnotationIdent(annotation: String) extends DeclTree with PropertyName {
+    override def name: String = "annotation"
+  }
+
   case class StyleIdent(paraName: String, paraValue: String) extends TermTree with PropertyName {
     override def name: String = "html"
   }
