@@ -51,6 +51,10 @@ object Trees {
     override def name: String = "size"
   }
 
+  case class PointIdent(position: String) extends TermTree with PropertyName {
+    override def name: String = "point"
+  }
+
   case class SizeIdent(iden: Ident) extends TermTree with PropertyName {
     override def name: String = "size"
   }
@@ -106,6 +110,13 @@ object Trees {
     override def name: String = "width"
   }
 
+  case class BorderWidthIdent(value: ValueTree) extends TermTree with PropertyName {
+    override def name: String = "borderWidth"
+  }
+
+  case class BorderRadiusIdent(value: ValueTree) extends TermTree with PropertyName {
+    override def name: String = "borderRadius"
+  }
   case class YIdent(value: ValueTree) extends TermTree with PropertyName {
     override def name: String = "y"
   }
@@ -117,7 +128,7 @@ object Trees {
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
-  case class AlignIdent(name: String) extends ValueTree with PropertyName {
+  case class ValueIdent(name: String) extends ValueTree with PropertyName {
   }
 
   case class ValueWithIdent(content: Ident) extends ValueTree

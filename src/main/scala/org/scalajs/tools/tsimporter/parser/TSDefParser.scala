@@ -34,6 +34,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "Align",
     "center",
     "left",
+    "point",
     "size",
     "right",
     "image",
@@ -99,7 +100,10 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val paraType: Parser[TermTree] =
       "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
       "x" ~> ":" ~> valueDecl ^^ XIdent |
+  "borderRadius" ~> ":" ~> valueDecl ^^ BorderRadiusIdent |
+        "borderWidth" ~> ":" ~> valueDecl ^^ BorderWidthIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
+        "point" ~> ":" ~> "Align"~>"."~>("center" | "left" | "right")  ^^ PointIdent |
         "visible" ~> ":" ~> identifier ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
@@ -120,13 +124,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   (identifier <~ "." <~"addPage" <~"(") ~ (identifier <~",")~ stringLit <~ ")" ^^ AddPageIdent
 
   lazy val widthValueDecl: Parser[ValueTree] =
-    (numericLit ^^ AlignIdent |
+    (numericLit ^^ ValueIdent |
       identifier <~ "." <~ "width" ^^ ValueWithIdent
       )
 
   lazy val valueDecl: Parser[ValueTree] =
-    (numericLit ^^ AlignIdent |
-      "Align" ~> "." ~> ("center" | "left" | "right") ^^ AlignIdent
+    (numericLit ^^ ValueIdent |
+      "Align" ~> "." ~> ("center" | "left" | "right") ^^ ValueIdent
       )
 
   lazy val ambientVarDecl: Parser[DeclTree] =

@@ -18,6 +18,10 @@ class Printer(private val output: PrintWriter,
   def printTermPara(paras: List[TermTree]): Unit = {
     for (para <- paras) {
       para match {
+        case BorderRadiusIdent (vale) =>
+        case PointIdent(str) =>
+        case BorderWidthIdent(a @ ValueIdent(b)) =>
+          plncss"border-width:${b}"
         case VisibleIdent (ident) =>
           plncss"visible:${ident.name}"
 
@@ -32,7 +36,7 @@ class Printer(private val output: PrintWriter,
         case w: WidthIdent =>
           plncss"width:${w.value}"
         case YIdent(alignDate) => alignDate match {
-          case AlignIdent(value) => value match {
+          case ValueIdent(value) => value match {
             case "top" =>
               plncss"y:0"
             case "bottom" =>
@@ -45,7 +49,7 @@ class Printer(private val output: PrintWriter,
           }
         }
         case XIdent(alignDate) => alignDate match {
-          case AlignIdent(value) => value match {
+          case ValueIdent(value) => value match {
             case "right" =>
               plncss"y:0"
             case "left" =>
