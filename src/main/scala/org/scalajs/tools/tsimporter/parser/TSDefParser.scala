@@ -22,38 +22,39 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   val lexical: TSDefLexical = new TSDefLexical
 
   lexical.reserved ++= List(
-      // Value keywords
-      "true", "false",
+    // Value keywords
+    "true", "false",
 
-      // Current JavaScript keywords
-      "break", "case", "catch", "continue", "debugger", "default", "delete",
-      "do", "else", "finally", "for", "function", "if", "in", "instanceof",
-      "new", "return", "switch", "this", "throw", "try", "typeof", "var",
-      "void", "while", "with",
+    // Current JavaScript keywords
+    "break", "case", "catch", "continue", "debugger", "default", "delete",
+    "do", "else", "finally", "for", "function", "if", "in", "instanceof",
+    "new", "return", "switch", "this", "throw", "try", "typeof", "var",
+    "void", "while", "with",
 
-      // Future reserved keywords - some used in TypeScript
-      "class", "const", "enum", "export", "extends", "import", "super",
+    // Future reserved keywords - some used in TypeScript
+    "class", "const", "enum", "export", "extends", "import", "super",
 
-      // Future reserved keywords in Strict mode - some used in TypeScript
-      "implements", "interface", "let", "package", "private", "protected",
-      "public", "static", "yield",
+    // Future reserved keywords in Strict mode - some used in TypeScript
+    "implements", "interface", "let", "package", "private", "protected",
+    "public", "static", "yield",
 
-      // Additional keywords of TypeScript
-      "declare", "module", "type", "namespace",
+    // Additional keywords of TypeScript
+    "declare", "module", "type", "namespace",
     // keywords of framerjs
     "Layer",
     "width",
     "x",
     "y",
-    "html","style",
-    "parent","height", "backgroundColor"
+    "html", "style",
+    "parent", "height", "backgroundColor",
+    "Align","center","left","right","image"
   )
 
   lexical.delimiters ++= List(
-      "{", "}", "(", ")", "[", "]", "<", ">",
-      ".", ";", ",", "?", ":", "=", "|",
-      // TypeScript-specific
-      "...", "=>"
+    "{", "}", "(", ")", "[", "]", "<", ">",
+    ".", ";", ",", "?", ":", "=", "|",
+    // TypeScript-specific
+    "...", "=>"
   )
 
   def parseDefinitions(input: Reader[Char]) =
@@ -77,35 +78,42 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "{" ~> rep(moduleElementDecl) <~ "}" ^^ (_.flatten)
 
   lazy val moduleElementDecl: Parser[Option[DeclTree]] = (
-      "export" ~> (
-          moduleElementDecl1 ^^ (Some(_))
+    "export" ~> (
+      moduleElementDecl1 ^^ (Some(_))
         | "=" ~> identifier <~ ";" ^^^ None)
-    | moduleElementDecl1 ^^ (Some(_))
-  )
+      | moduleElementDecl1 ^^ (Some(_))
+    )
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-      framerLayerDecl
-  )
+    framerLayerDecl
+    )
 
   lazy val framerLayerDecl: Parser[DeclTree] =
-  identifier ~ ("="  ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
+    identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 
-  lazy val parameterBody : Parser[List[TermTree]] =
+  lazy val parameterBody: Parser[List[TermTree]] =
     rep(paraType)
 
-  lazy val styleParaType :  Parser[TermTree]  =
-    stringLit ~ ( ":" ~> stringLit) ^^ StyleIdent
 
-  lazy val paraType :  Parser[TermTree]  =
+  lazy val paraType: Parser[TermTree] =
     "width" ~> ":" ~> numericLit ^^ WidthIdent |
       "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
-    "x" ~> ":" ~> numericLit ^^ XIdent |
-      "y" ~> ":" ~> numericLit ^^ YIdent |
+      "x" ~> ":" ~> valueDecl ^^ XIdent | //(numericLit ^^ ValueIdent | "Align.center") ^^ XIdent |
+      "y" ~> ":" ~> valueDecl ^^ YIdent |
+      "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
-  "parent" ~> ":" ~> identifier ^^ ParentIdent |
-  "height" ~> ":" ~> numericLit ^^ HeightIdent |
-  "style" ~> ":" ~> styleParaType
+      "parent" ~> ":" ~> identifier ^^ ParentIdent |
+      "height" ~> ":" ~> numericLit ^^ HeightIdent |
+      "style" ~> ":" ~> styleParaType
 
+
+  lazy val styleParaType: Parser[TermTree] =
+    stringLit ~ (":" ~> stringLit) ^^ StyleIdent
+
+  lazy val valueDecl: Parser[ValueTree] =
+    (numericLit ^^ AlignIdent |
+      "Align" ~> "." ~> ("center"|"left"|"right") ^^ AlignIdent
+      )
 
   lazy val ambientVarDecl: Parser[DeclTree] =
     "var" ~> identifier ~ optTypeAnnotation <~ opt(";") ^^ VarDecl
@@ -125,13 +133,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val ambientInterfaceDecl: Parser[DeclTree] =
     "interface" ~> typeName ~ tparams ~ intfInheritance ~ memberBlock <~ opt(";") ^^ InterfaceDecl
 
-//  lazy val typeAliasDecl: Parser[DeclTree] =
-//    "type" ~> typeName ~ tparams ~ ("=" ~> typeDesc) <~ opt(";") ^^ TypeAliasDecl
+  //  lazy val typeAliasDecl: Parser[DeclTree] =
+  //    "type" ~> typeName ~ tparams ~ ("=" ~> typeDesc) <~ opt(";") ^^ TypeAliasDecl
 
   lazy val tparams = (
-      "<" ~> rep1sep(typeParam, ",") <~ ">"
-    | success(Nil)
-  )
+    "<" ~> rep1sep(typeParam, ",") <~ ">"
+      | success(Nil)
+    )
 
   lazy val typeParam: Parser[TypeParam] =
     typeName ~ opt("extends" ~> typeRef) ^^ TypeParam
@@ -140,14 +148,14 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     opt("extends" ~> typeRef)
 
   lazy val classImplements = (
-      "implements" ~> repsep(typeRef, ",")
-    | success(Nil)
-  )
+    "implements" ~> repsep(typeRef, ",")
+      | success(Nil)
+    )
 
   lazy val intfInheritance = (
-      "extends" ~> repsep(typeRef, ",")
-    | success(Nil)
-  )
+    "extends" ~> repsep(typeRef, ",")
+      | success(Nil)
+    )
 
   lazy val functionSignature =
     tparams ~ ("(" ~> repsep(functionParam, ",") <~ ")") ~ optResultType ^^ FunSignature
@@ -160,7 +168,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
         FunParam(i, o, Some(RepeatedType(t)))
       case _ ~ i ~ o ~ t =>
         Console.err.println(
-            s"Warning: Dropping repeated marker of param $i because its type $t is not an array type")
+          s"Warning: Dropping repeated marker of param $i because its type $t is not an array type")
         FunParam(i, o, t)
     }
 
@@ -174,17 +182,17 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     opt(":" ~> paramType)
 
   lazy val paramType: Parser[TypeTree] = (
-      typeDesc
-    | stringLiteral ^^ ConstantType
-  )
+    typeDesc
+      | stringLiteral ^^ ConstantType
+    )
 
   lazy val optResultType =
     opt(":" ~> resultType)
 
   lazy val resultType: Parser[TypeTree] = (
-      ("void" ^^^ TypeRef(CoreType("void")))
-    | typeDesc
-  )
+    ("void" ^^^ TypeRef(CoreType("void")))
+      | typeDesc
+    )
 
   lazy val optTypeAnnotation =
     opt(typeAnnotation)
@@ -206,13 +214,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     }
 
   lazy val baseTypeDesc: Parser[TypeTree] = (
-      typeRef
-    | objectType
-    | functionType
-    | typeQuery
-    | tupleType
-    | "(" ~> typeDesc <~ ")"
-  )
+    typeRef
+      | objectType
+      | functionType
+      | typeQuery
+      | tupleType
+      | "(" ~> typeDesc <~ ")"
+    )
 
   lazy val typeRef: Parser[TypeRef] =
     baseTypeRef ~ opt(typeArgs) ^^ {
@@ -266,15 +274,15 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val namedMember: Parser[MemberTree] =
     maybeStaticPropName ~ optionalMarker >> {
       case (name, static) ~ optional => (
-          functionSignature ^^ (FunctionMember(name, optional, _, static))
-        | typeAnnotation ^^ (PropertyMember(name, optional, _, static))
-      )
+        functionSignature ^^ (FunctionMember(name, optional, _, static))
+          | typeAnnotation ^^ (PropertyMember(name, optional, _, static))
+        )
     }
 
   lazy val maybeStaticPropName: Parser[(PropertyName, Boolean)] = (
-      "static" ~> propertyName ^^ staticPropName
-    | propertyName ^^ nonStaticPropName
-  )
+    "static" ~> propertyName ^^ staticPropName
+      | propertyName ^^ nonStaticPropName
+    )
 
   val staticPropName = (p: PropertyName) => (p, true)
   val nonStaticPropName = (p: PropertyName) => (p, false)
@@ -287,9 +295,9 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val identifierName =
     accept("IdentifierName", {
-      case lexical.Identifier(chars)                                  => chars
+      case lexical.Identifier(chars) => chars
       case lexical.Keyword(chars) if chars.forall(Character.isLetter) => chars
-      case a:Elem => {
+      case a: Elem => {
         Console.println(a);
         ""
       }
@@ -317,4 +325,5 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       case _ => None
     }
   }
+
 }

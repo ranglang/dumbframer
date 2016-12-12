@@ -12,16 +12,15 @@ import org.scalajs.tools.tsimporter.Trees._
 class Printer(private val output: PrintWriter,
               private val output1: PrintWriter,
               outputPackage: String) {
-
   import Printer._
-
   private implicit val self = this
-
   private var currentJSNamespace = ""
-
   def printTermPara(paras: List[TermTree]): Unit = {
     for (para <- paras) {
       para match {
+        case image: ImageIdent =>
+          val a = "\""+image.value +"\""
+          plncss"backgroundImage:$a"
         case s: StyleIdent =>
           plncss"${s.paraName}:${s.paraValue}"
         case v: HeightIdent =>
@@ -30,19 +29,43 @@ class Printer(private val output: PrintWriter,
         case w: WidthIdent =>
           Console.println("width:" + w.value)
           plncss"width:${w.value}"
-        case x: XIdent =>
-          Console.println("margin-left:" + x.value)
-          plncss"x:${x.value}"
+        case YIdent(alignDate) => alignDate match {
+          case AlignIdent(value) => value match {
+            case "top" =>
+              plncss"y:0"
+            case "bottom" =>
+              plncss":0"
+            case "center" =>
+              plncss"margin-top:auto"
+              plncss"margin-bottom:auto"
+            case a:String =>
+              plncss"margin-top:${a}"
+          }
+        }
+        case XIdent(alignDate) => alignDate match {
+          case AlignIdent(value) => value match {
+            case "right" =>
+              plncss"y:0"
+            case "left" =>
+              plncss"x:0"
+            case "center" =>
+              plncss"margin-left:auto"
+              plncss"margin-right:auto"
+            case a:String =>
+              plncss"margin-left:${a}"
+          }
+        }
         case b: BackGroundColorIdent =>
           plncss"background-color:${b.value}"
-        case y: YIdent =>
-          Console.println("margin-right:" + y.value)
-          plncss"y:${y.value}"
+//        case y: YIdent =>
+//          Console.println("margin-right:" + y.value)
+//          plncss"y:${y.value}"
         case _ => Console.println("..")
       }
     }
 
   }
+
   def printSymbol(sym: Symbol) {
     val name = sym.name
     sym match {
@@ -63,7 +86,7 @@ class Printer(private val output: PrintWriter,
           printSymbol(member)
         }
         val currentLayer = layer.nme.name
-        val c = "."+name +" {"
+        val c = "." + name + " {"
         Console.println(c)
         plncss"$c"
         printTermPara(layer.params);
@@ -81,16 +104,16 @@ class Printer(private val output: PrintWriter,
           if (isRootPackage) outputPackage.split("\\.").toList.map(Name(_))
           else List(name)
 
-//        if (!parentPackage.isEmpty) {
-//          pln"package ${parentPackage.mkString(".")}"
-//        }
+        //        if (!parentPackage.isEmpty) {
+        //          pln"package ${parentPackage.mkString(".")}"
+        //        }
 
-//        if (isRootPackage) {
-//          pln"";
-//          pln"import scala.scalajs.js"
-//          pln"import js.annotation._"
-//          pln"import js.|"
-//        }
+        //        if (isRootPackage) {
+        //          pln"";
+        //          pln"import scala.scalajs.js"
+        //          pln"import js.annotation._"
+        //          pln"import js.|"
+        //        }
 
         val oldJSNamespace = currentJSNamespace
         if (!isRootPackage)
@@ -100,36 +123,36 @@ class Printer(private val output: PrintWriter,
           val (topLevels, packageObjectMembers) =
             sym.members.partition(canBeTopLevel)
 
-//          pln"";
-//          pln"package $thisPackage {"
+          //          pln"";
+          //          pln"package $thisPackage {"
 
           for (sym <- topLevels)
             printSymbol(sym)
 
           if (!packageObjectMembers.isEmpty) {
-//            val packageObjectName =
-//              Name(thisPackage.name.head.toUpper + thisPackage.name.tail)
+            //            val packageObjectName =
+            //              Name(thisPackage.name.head.toUpper + thisPackage.name.tail)
 
-//            pln"";
-//            if (currentJSNamespace == "") {
-//              pln"@js.native"
-//              pln"object $packageObjectName extends js.GlobalScope {"
-//            } else {
-//              val jsName = currentJSNamespace.init
-//              pln"""@JSName("$jsName")"""
-//              pln"@js.native"
-//              pln"object $packageObjectName extends js.Object {"
-//            }
+            //            pln"";
+            //            if (currentJSNamespace == "") {
+            //              pln"@js.native"
+            //              pln"object $packageObjectName extends js.GlobalScope {"
+            //            } else {
+            //              val jsName = currentJSNamespace.init
+            //              pln"""@JSName("$jsName")"""
+            //              pln"@js.native"
+            //              pln"object $packageObjectName extends js.Object {"
+            //            }
             for (sym <- packageObjectMembers)
               printSymbol(sym)
-//            pln"}"
+            //            pln"}"
           }
 
-//          pln"";
-//          pln"}"
+          //          pln"";
+          //          pln"}"
         }
 
-//        currentJSNamespace = oldJSNamespace
+      //        currentJSNamespace = oldJSNamespace
 
       case sym: ClassSymbol =>
         val sealedKw = if (sym.isSealed) "sealed " else ""
@@ -243,15 +266,16 @@ class Printer(private val output: PrintWriter,
         p"$typeName[$targs]"
     }
   }
+
   private def print1(x: Any) {
     x match {
-//      case x: Symbol => printSymbol(x)
-//      case x: TypeRef => printTypeRef(x)
-//      case QualifiedName(Name.scala, Name.scalajs, Name.js, name) =>
-//        output.print("js.")
-//        output.print(name)
-//      case QualifiedName(Name.scala, name) => output.print(name)
-//      case QualifiedName(Name.java, Name.lang, name) => output.print(name)
+      //      case x: Symbol => printSymbol(x)
+      //      case x: TypeRef => printTypeRef(x)
+      //      case QualifiedName(Name.scala, Name.scalajs, Name.js, name) =>
+      //        output.print("js.")
+      //        output.print(name)
+      //      case QualifiedName(Name.scala, name) => output.print(name)
+      //      case QualifiedName(Name.java, Name.lang, name) => output.print(name)
       case _ => output1.print(x)
     }
   }
@@ -332,7 +356,7 @@ object Printer {
     }
 
     def plncss(args: Any*)(implicit printer: Printer,
-                        sep: ListElemSeparator = ListElemSeparator.Comma) {
+                           sep: ListElemSeparator = ListElemSeparator.Comma) {
       pcss(args: _*)
       printer.output1.println()
     }

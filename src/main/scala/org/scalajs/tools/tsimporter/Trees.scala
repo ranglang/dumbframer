@@ -24,7 +24,7 @@ object Trees {
   sealed trait TermTree extends Tree
   sealed trait TypeTree extends Tree
   sealed trait MemberTree extends Tree
-
+  sealed trait ValueTree extends Tree
   sealed trait LayerTree extends Tree
 
   // Identifiers and properties
@@ -47,6 +47,10 @@ object Trees {
     override def name: String = "html"
   }
 
+  case class ImageIdent(value: String) extends TermTree with PropertyName {
+    override def name: String = "image"
+  }
+
   case class HtmlIdent(value: String) extends TermTree with PropertyName {
     override def name: String = "html"
   }
@@ -67,17 +71,21 @@ object Trees {
     override def name: String = "width"
   }
 
-  case class YIdent(value: String) extends TermTree with PropertyName {
+  case class YIdent(value: ValueTree) extends TermTree with PropertyName {
     override def name: String = "y"
   }
 
-  case class XIdent(value: String) extends TermTree with PropertyName {
+  case class XIdent(value: ValueTree) extends TermTree with PropertyName {
     override def name: String = "x"
+  }
+
+  case class AlignIdent(name: String) extends ValueTree with PropertyName {
   }
 
   case class Ident(name: String) extends Tree with PropertyName {
     Ident.requireValidIdent(name)
   }
+
 
   object Ident extends (String => Ident) {
     final def isValidIdentifier(name: String): Boolean = {

@@ -1,6 +1,6 @@
 scalaVersion := "2.11.7"
 
-name := "TypeScript importer for Scala.js"
+name := "DumpFramer"
 
 version := "0.1-SNAPSHOT"
 
