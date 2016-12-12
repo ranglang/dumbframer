@@ -39,7 +39,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "image",
     "Import","file",
     "PageComponent","Framer","Importer","load"
-    ,"on","Events","event","layer","Click","addPage"
+    ,"on","Events","event","layer","Click","addPage",
+    "snapToPage","new","visible"
   )
 
   lexical.delimiters ++= List(
@@ -53,7 +54,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   def parseDefinitions(input: Reader[Char]) =
     phrase(ambientDeclarations)(new lexical.Scanner(input))
 
-
   //  btn_cart_close.on Events.Click,(event, layer) ->
   //    cart.visible = false
 
@@ -64,14 +64,17 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     rep(moduleElementDecl1)
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-//      framerLayerDecl |
-      annotationDecl |
+        framerLayerDecl|
+    framerPageDecl|
+   annotationDecl |
     EventDecl|
-    addPageDecl
-//        setProgressDecl
+    addPageDecl|
+    snapToDecl|
+    framerImporterDecl |
+    setProgressDecl
     )
 
-  lazy val framerImporterDecl: Parser[TermTree] =
+  lazy val framerImporterDecl: Parser[DeclTree] =
     identifier ~> "="~> "Framer"~>"." ~>"Importer"~>"." ~>"load" ~>"(" ~> stringLiteral~>")" ^^ ImportFileIdent
 
   lazy val setProgressDecl: Parser[DeclTree] =
@@ -86,27 +89,40 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val framerPageDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "PageComponent" ~> parameterBody) ^^ PageDecl
 
+  lazy val snapToDecl: Parser[DeclTree] =
+    identifier ~ ("."~>"snapToPage" ~>"("~> identifier <~")") ^^ SnapToIdent
+
   lazy val parameterBody: Parser[List[TermTree]] =
     rep(paraType)
 
 
   lazy val paraType: Parser[TermTree] =
-    "width" ~> ":" ~> numericLit ^^ WidthIdent |
       "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
       "x" ~> ":" ~> valueDecl ^^ XIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
+        "visible" ~> ":" ~> identifier ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
-      "height" ~> ":" ~> numericLit ^^ HeightIdent |
+       "width" ~> ":" ~> widthValueDecl ^^ WidthIdent |
+      "height" ~> ":" ~> widthValueDecl ^^ HeightIdent |
       "size"~>":" ~> (identifier <~ "." <~ "size")  ^^ SizeIdent |
       "style" ~> ":" ~> styleParaType
+
+//  lazy val styleParaType: Parser[Boolean] =
+//    "true" ^^ success(true)
 
   lazy val styleParaType: Parser[TermTree] =
     stringLit ~ (":" ~> stringLit) ^^ StyleIdent
 
+
   lazy val addPageDecl: Parser[DeclTree] =
   (identifier <~ "." <~"addPage" <~"(") ~ (identifier <~",")~ stringLit <~ ")" ^^ AddPageIdent
+
+  lazy val widthValueDecl: Parser[ValueTree] =
+    (numericLit ^^ AlignIdent |
+      identifier <~ "." <~ "width" ^^ ValueWithIdent
+      )
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ AlignIdent |

@@ -127,6 +127,7 @@ class Importer(val output: java.io.PrintWriter,
         }
       case AnnotationIdent(file, filePath) =>
       case EventIdent(ident, progress) =>
+      case SnapToIdent(source,target) =>
       case AddPageIdent(ident,value,position) =>
       case SetProgressIdent(ident,value) =>
         //TODO setProgress

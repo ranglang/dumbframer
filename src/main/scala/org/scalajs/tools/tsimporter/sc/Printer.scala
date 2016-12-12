@@ -18,6 +18,9 @@ class Printer(private val output: PrintWriter,
   def printTermPara(paras: List[TermTree]): Unit = {
     for (para <- paras) {
       para match {
+        case VisibleIdent (ident) =>
+          plncss"visible:${ident.name}"
+
         case SizeIdent(ident) =>
         case image: ImageIdent =>
           val a = "\""+image.value +"\""
