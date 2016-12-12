@@ -5,7 +5,9 @@
 
 package org.scalajs.tools.tsimporter.parser
 
+import org.scalajs.tools.tsimporter.Trees
 import org.scalajs.tools.tsimporter.Trees._
+
 import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.token._
 import scala.util.parsing.combinator.syntactical._
@@ -19,22 +21,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lexical.reserved ++= List(
     // Value keywords
     "true", "false",
-
-    // Current JavaScript keywords
-    "break", "case", "catch", "continue", "debugger", "default", "delete",
-    "do", "else", "finally", "for", "function", "if", "in", "instanceof",
-    "new", "return", "switch", "this", "throw", "try", "typeof", "var",
-    "void", "while", "with",
-
-    // Future reserved keywords - some used in TypeScript
-    "class", "const", "enum", "export", "extends", "import", "super",
-
-    // Future reserved keywords in Strict mode - some used in TypeScript
-    "implements", "interface", "let", "package", "private", "protected",
-    "public", "static", "yield",
-
-    // Additional keywords of TypeScript
-    "declare", "module", "type", "namespace",
+    // Additional keywords of FramerJs
     "Layer",
     "width",
     "x",
@@ -47,38 +34,57 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "Align",
     "center",
     "left",
+    "size",
     "right",
-    "image"
-      ,"#",
-    "Import","file"
+    "image",
+    "Import","file",
+    "PageComponent","Framer","Importer","load"
+    ,"on","Events","event","layer","Click","addPage"
   )
 
   lexical.delimiters ++= List(
     "{", "}", "(", ")", "[", "]", "<", ">",
     ".", ";", ",", "?", ":", "=", "|",
     // TypeScript-specific
-    "...", "=>","#"
+    "...", "=>","->",
+    "#"
   )
 
   def parseDefinitions(input: Reader[Char]) =
     phrase(ambientDeclarations)(new lexical.Scanner(input))
 
-  lazy val ambientDeclarations: Parser[List[DeclTree]] =
-    rep(ambientDeclaration)
 
-  lazy val ambientDeclaration: Parser[DeclTree] =
-    opt("declare") ~> opt("export") ~> moduleElementDecl1
+  //  btn_cart_close.on Events.Click,(event, layer) ->
+  //    cart.visible = false
+
+  lazy val EventDecl: Parser[DeclTree] =
+    identifier ~ ("."~>"on"~>"Events" ~> "." ~>"Click"~> "," ~> "(" ~>"event" ~>","~>"layer"~>")"~>"->"~> rep(setProgressDecl) )^^ EventIdent
+
+  lazy val ambientDeclarations: Parser[List[DeclTree]] =
+    rep(moduleElementDecl1)
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-    //    framerLayerDecl |
-    annotationDecl
+//      framerLayerDecl |
+      annotationDecl |
+    EventDecl|
+    addPageDecl
+//        setProgressDecl
     )
 
+  lazy val framerImporterDecl: Parser[TermTree] =
+    identifier ~> "="~> "Framer"~>"." ~>"Importer"~>"." ~>"load" ~>"(" ~> stringLiteral~>")" ^^ ImportFileIdent
+
+  lazy val setProgressDecl: Parser[DeclTree] =
+    repsep(identifier,".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
+
   lazy val annotationDecl: Parser[DeclTree] =
-   "#" ~> "Import" ~>"file" ~>stringLit ^^ AnnotationIdent
+   "#" ~> "Import" ~>"file" ~> stringLit ~ framerImporterDecl ^^ AnnotationIdent
 
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
+
+  lazy val framerPageDecl: Parser[DeclTree] =
+    identifier ~ ("=" ~> "new" ~> "PageComponent" ~> parameterBody) ^^ PageDecl
 
   lazy val parameterBody: Parser[List[TermTree]] =
     rep(paraType)
@@ -93,11 +99,14 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
       "height" ~> ":" ~> numericLit ^^ HeightIdent |
+      "size"~>":" ~> (identifier <~ "." <~ "size")  ^^ SizeIdent |
       "style" ~> ":" ~> styleParaType
-
 
   lazy val styleParaType: Parser[TermTree] =
     stringLit ~ (":" ~> stringLit) ^^ StyleIdent
+
+  lazy val addPageDecl: Parser[DeclTree] =
+  (identifier <~ "." <~"addPage" <~"(") ~ (identifier <~",")~ stringLit <~ ")" ^^ AddPageIdent
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ AlignIdent |
@@ -284,7 +293,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       case lexical.Identifier(chars) => chars
       case lexical.Keyword(chars) if chars.forall(Character.isLetter) => chars
       case a: Elem => {
-        Console.println(a);
         ""
       }
     })

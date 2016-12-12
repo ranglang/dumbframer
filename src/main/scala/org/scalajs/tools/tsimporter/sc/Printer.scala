@@ -18,20 +18,15 @@ class Printer(private val output: PrintWriter,
   def printTermPara(paras: List[TermTree]): Unit = {
     for (para <- paras) {
       para match {
-        case AnnotationIdent(file) =>
-            Console.println(file)
-//          val a = "\""+image.value +"\""
-//          plncss"backgroundImage:$a"
+        case SizeIdent(ident) =>
         case image: ImageIdent =>
           val a = "\""+image.value +"\""
           plncss"backgroundImage:$a"
         case s: StyleIdent =>
           plncss"${s.paraName}:${s.paraValue}"
         case v: HeightIdent =>
-          Console.println("height:" + v.value)
           plncss"height:${v.value}"
         case w: WidthIdent =>
-          Console.println("width:" + w.value)
           plncss"width:${w.value}"
         case YIdent(alignDate) => alignDate match {
           case AlignIdent(value) => value match {
@@ -61,9 +56,6 @@ class Printer(private val output: PrintWriter,
         }
         case b: BackGroundColorIdent =>
           plncss"background-color:${b.value}"
-//        case y: YIdent =>
-//          Console.println("margin-right:" + y.value)
-//          plncss"y:${y.value}"
         case _ => Console.println("..")
       }
     }
@@ -82,8 +74,6 @@ class Printer(private val output: PrintWriter,
         plncss"}"
       }
       case layer: LayerSymbol => {
-        Console.println("/////////////");
-        Console.println(layer);
         val a = "\"" + layer.name + "\""
         pln"<div class=${a}>"
         for (member <- layer.members) {
@@ -91,7 +81,6 @@ class Printer(private val output: PrintWriter,
         }
         val currentLayer = layer.nme.name
         val c = "." + name + " {"
-        Console.println(c)
         plncss"$c"
         printTermPara(layer.params);
         pln"</div>"
@@ -100,6 +89,11 @@ class Printer(private val output: PrintWriter,
 
       case comment: CommentSymbol =>
         pln"/* ${comment.text} */"
+
+      case PageSymbol(name, params,list) =>
+        for(page <- list) {
+          printSymbol(page)
+        }
 
       case sym: PackageSymbol =>
         val isRootPackage = name == Name.EMPTY

@@ -96,8 +96,10 @@ class TSDefLexical extends Lexical with StdTokens with ImplicitConversions {
       whitespaceChar
     | '/' ~ '/' ~ rep(chrExcept(EofCh, '\n'))
     | '/' ~ '*' ~ rep(not('*' ~ '/') ~> chrExcept(EofCh)) ~ '*' ~ '/'
+    | '#' ~ rep(chrExcept(EofCh, '\n'))
     | '/' ~ '*' ~ failure("unclosed comment")
   )
+//  rep(not('*' ~ '/') ~> chrExcept(EofCh))
 
   // utils
 

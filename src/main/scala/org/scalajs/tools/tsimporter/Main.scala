@@ -18,7 +18,7 @@ import parser.TSDefParser
 object Main {
   def main(args: Array[String]) {
 //    if (args.length < 2) {
-//      Console.err.println("""
+//      onsole.err.println("""
 //        |Usage: scalajs-ts-importer <input.d.ts> <output.scala> [<package>]
 //        |  <input.d.ts>     TypeScript type definition file to read
 //        |  <output.scala>   Output Scala.js file
@@ -27,13 +27,12 @@ object Main {
 //      System.exit(1)
 //    }
 
-    val inputFileName = "1.ts"
+    val inputFileName = "input.ts"
     val outputFileName = "out.html"
     val outputFileName1 = "out.css"
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
 
     val definitions = parseDefinitions(readerForFile(inputFileName))
-    Console.println(definitions);
 
     val output = new PrintWriter(new BufferedWriter(
         new FileWriter(outputFileName)))

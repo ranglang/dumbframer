@@ -113,9 +113,6 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
   }
 
   def getLayer(name: Name): LayerSymbol = {
-    Console.println(members)
-    Console.println(members.head.name);
-    Console.println("getLayer"+name);
       val optMembers = members.collectFirst {
         case sym: LayerSymbol if sym.name == name => sym
       }
@@ -200,6 +197,9 @@ case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends 
 }
 
 case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
+}
+
+case class PageSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }
 
 class TypeAliasSymbol(nme: Name) extends Symbol(nme) {

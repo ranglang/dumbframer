@@ -102,6 +102,9 @@ class Importer(val output: java.io.PrintWriter,
       case FunctionDecl(IdentName(name), signature) =>
         processDefDecl(owner, name, signature)
 
+      case PageDecl(IdentName(name), params) =>
+        owner.members += new PageSymbol(name, params)
+
       case LayerDecl(IdentName(name), params) =>
         val parentOpt:Option[ParentIdent] = params.collectFirst{
           case cat: ParentIdent => cat
@@ -120,10 +123,14 @@ class Importer(val output: java.io.PrintWriter,
           case Some(parentIdent) =>
             owner.getLayer(Name(parentIdent.value.name)).members += contaner
           case None =>
-            Console.println("None => "+name)
              owner.members += contaner
         }
-      case AnnotationIdent(file) =>
+      case AnnotationIdent(file, filePath) =>
+      case EventIdent(ident, progress) =>
+      case AddPageIdent(ident,value,position) =>
+      case SetProgressIdent(ident,value) =>
+        //TODO setProgress
+        Console.println(ident);
       case _ =>
         owner.members += new CommentSymbol("??? "+declaration)
     }

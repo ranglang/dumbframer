@@ -25,7 +25,6 @@ object Trees {
   sealed trait TypeTree extends Tree
   sealed trait MemberTree extends Tree
   sealed trait ValueTree extends Tree
-  sealed trait LayerTree extends Tree
 
   // Identifiers and properties
 
@@ -43,12 +42,33 @@ object Trees {
       Some(tree.name)
   }
 
-  case class AnnotationIdent(annotation: String) extends DeclTree with PropertyName {
+  case class AnnotationIdent(annotation: String, file: TermTree) extends DeclTree with PropertyName {
+    override def name: String = "annotation"
+  }
+
+
+  case class EventIdent(ident: Ident, members: List[DeclTree]) extends DeclTree with PropertyName {
+    override def name: String = "size"
+  }
+
+  case class SizeIdent(iden: Ident) extends TermTree with PropertyName {
+    override def name: String = "size"
+  }
+
+  case class ImportFileIdent(annotation: String) extends TermTree with PropertyName {
     override def name: String = "annotation"
   }
 
   case class StyleIdent(paraName: String, paraValue: String) extends TermTree with PropertyName {
     override def name: String = "html"
+  }
+
+  case class SetProgressIdent(paraName:List[Ident], paraValue: String) extends DeclTree with PropertyName {
+    override def name: String = "setProgress"
+  }
+
+  case class AddPageIdent(source:Ident,target: Ident, position: String) extends DeclTree with PropertyName {
+    override def name: String = "addPage"
   }
 
   case class ImageIdent(value: String) extends TermTree with PropertyName {
@@ -114,6 +134,8 @@ object Trees {
   case class WidthDecl(value: String) extends DeclTree
 
   case class LayerDecl(name: Ident, members: List[TermTree]) extends DeclTree
+
+  case class PageDecl(name: Ident, members: List[TermTree]) extends DeclTree
 
 
   case class FunctionDecl(name: Ident, signature: FunSignature) extends DeclTree

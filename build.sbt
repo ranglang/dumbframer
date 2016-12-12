@@ -17,3 +17,5 @@ scalacOptions ++= Seq(
     "-feature",
     "-encoding", "utf8"
 )
+
+addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17")

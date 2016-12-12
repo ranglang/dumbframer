@@ -25,3 +25,4 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 input.html
+.DS_Store
