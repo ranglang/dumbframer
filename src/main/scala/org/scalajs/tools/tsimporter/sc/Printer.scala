@@ -36,30 +36,60 @@ class Printer(private val output: PrintWriter,
         case w: WidthIdent =>
           plncss"width:${w.value}"
         case YIdent(alignDate) => alignDate match {
-          case ValueIdent(value) => value match {
-            case "top" =>
-              plncss"y:0"
-            case "bottom" =>
-              plncss":0"
-            case "center" =>
-              plncss"margin-top:auto"
-              plncss"margin-bottom:auto"
-            case a:String =>
-              plncss"margin-top:${a}"
-          }
+          case Value3Ident(position,opts,Some(num)) =>
+            opts match {
+              case  Some(str) => position match {
+                case "right" =>
+                  plncss"y:0"
+                case "left" =>
+                  plncss"x:0"
+                case "center" =>
+                  plncss"margin-left:auto"
+                  plncss"margin-right:auto"
+                case a: String =>
+                  plncss"margin-left:${a}"
+
+              }
+              case None => position match {
+                case "right" =>
+                  plncss"y:0"
+                case "left" =>
+                  plncss"x:0"
+                case "center" =>
+                  plncss"margin-left:auto"
+                  plncss"margin-right:auto"
+                case a: String =>
+                  plncss"margin-left:${a}"
+              }
+            }
         }
         case XIdent(alignDate) => alignDate match {
-          case ValueIdent(value) => value match {
-            case "right" =>
-              plncss"y:0"
-            case "left" =>
-              plncss"x:0"
-            case "center" =>
-              plncss"margin-left:auto"
-              plncss"margin-right:auto"
-            case a:String =>
-              plncss"margin-left:${a}"
-          }
+          case Value3Ident(position,opts,Some(num)) =>
+            opts match {
+              case  Some(str) => position  match {
+                case "right" =>
+                  plncss"y:0"
+                case "left" =>
+                  plncss"x:0"
+                case "center" =>
+                  plncss"margin-left:auto"
+                  plncss"margin-right:auto"
+                case a: String =>
+                  plncss"margin-left:${a}"
+
+              }
+              case None => position match {
+                case "right" =>
+                  plncss"y:0"
+                case "left" =>
+                  plncss"x:0"
+                case "center" =>
+                  plncss"margin-left:auto"
+                  plncss"margin-right:auto"
+                case a: String =>
+                  plncss"margin-left:${a}"
+              }
+            }
         }
         case b: BackGroundColorIdent =>
           plncss"background-color:${b.value}"

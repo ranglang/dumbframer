@@ -59,6 +59,10 @@ object Trees {
     override def name: String = "size"
   }
 
+  case class FramerInfo(title: String, info1: String, info2: String, info3: String) extends DeclTree with PropertyName {
+    override def name: String = "framerInfo"
+  }
+
   case class ImportFileIdent(annotation: String) extends DeclTree with PropertyName {
     override def name: String = "annotation"
   }
@@ -129,10 +133,17 @@ object Trees {
     override def name: String = "scrollVertical"
   }
 
+  case class ClipIdent(bool: String) extends ValueTree with PropertyName {
+    override def name: String = "scrollVertical"
+  }
+
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
   case class ValueIdent(name: String) extends ValueTree with PropertyName {
+  }
+
+  case class Value3Ident(name: String, calculate: Option[String], num: Option[String]) extends ValueTree with PropertyName {
   }
 
   case class ValueWithIdent(content: Ident, value: String) extends ValueTree

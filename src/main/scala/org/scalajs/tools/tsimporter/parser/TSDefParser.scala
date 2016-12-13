@@ -34,21 +34,24 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "Align",
     "center",
     "left",
+    "top",
     "point",
     "size",
     "right",
     "image",
-    "Import","file",
-    "PageComponent","Framer","Importer","load"
-    ,"on","Events","event","layer","Click","addPage",
-    "snapToPage","new","visible","height","scrollVertical"
+    "Import", "file",
+    "PageComponent", "Framer", "Importer", "load"
+    , "on", "Events", "event", "layer", "Click", "addPage",
+    "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
+    "title","author","twitter","description","Info"
   )
 
   lexical.delimiters ++= List(
     "{", "}", "(", ")", "[", "]", "<", ">",
     ".", ";", ",", "?", ":", "=", "|",
+    "-","+",
     // TypeScript-specific
-    "...", "=>","->",
+    "...", "=>", "->",
     "#"
   )
 
@@ -59,30 +62,34 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   //    cart.visible = false
 
   lazy val EventDecl: Parser[DeclTree] =
-    identifier ~ ("."~>"on"~>"Events" ~> "." ~>"Click"~> "," ~> "(" ~>"event" ~>","~>"layer"~>")"~>"->"~> rep(setProgressDecl) )^^ EventIdent
+    identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> "Click" ~> "," ~> "(" ~> "event" ~> "," ~> "layer" ~> ")" ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
 
   lazy val ambientDeclarations: Parser[List[DeclTree]] =
     rep(moduleElementDecl1)
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-        framerLayerDecl|
-    framerPageDecl|
-   annotationDecl |
-    EventDecl|
-    addPageDecl|
-    snapToDecl|
-    framerImporterDecl |
-    setProgressDecl
+//    framerLayerDecl |
+//      framerPageDecl |
+//      annotationDecl |
+//      EventDecl |
+//      addPageDecl |
+//      snapToDecl |
+//      framerImporterDecl |
+//      setProgressDecl |
+    frameInfoDecl
     )
 
+  lazy val frameInfoDecl: Parser[DeclTree] =
+    ("Framer" ~> "." ~> "Info"~> "=" ~> "title" ~> ":" ~> stringLit) ~ ("author" ~>":"~> stringLit) ~ ("twitter"  ~>":"~> stringLit) ~("description" ~>":" ~> stringLit) ^^ FramerInfo
+
   lazy val framerImporterDecl: Parser[DeclTree] =
-    identifier ~> "="~> "Framer"~>"." ~>"Importer"~>"." ~>"load" ~>"(" ~> stringLiteral~>")" ^^ ImportFileIdent
+    identifier ~> "=" ~> "Framer" ~> "." ~> "Importer" ~> "." ~> "load" ~> "(" ~> stringLiteral ~> ")" ^^ ImportFileIdent
 
   lazy val setProgressDecl: Parser[DeclTree] =
-    repsep(identifier,".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
+    repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
 
   lazy val annotationDecl: Parser[DeclTree] =
-   "#" ~> "Import" ~>"file" ~> stringLit ~ framerImporterDecl ^^ AnnotationIdent
+    "#" ~> "Import" ~> "file" ~> stringLit ~ framerImporterDecl ^^ AnnotationIdent
 
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
@@ -91,27 +98,28 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~ ("=" ~> "new" ~> "PageComponent" ~> parameterBody) ^^ PageDecl
 
   lazy val snapToDecl: Parser[DeclTree] =
-    identifier ~ ("."~>"snapToPage" ~>"("~> identifier <~")") ^^ SnapToIdent
+    identifier ~ ("." ~> "snapToPage" ~> "(" ~> identifier <~ ")") ^^ SnapToIdent
 
   lazy val parameterBody: Parser[List[TermTree]] =
     rep(paraType)
 
 
   lazy val paraType: Parser[TermTree] =
-      "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
+    "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
       "x" ~> ":" ~> valueDecl ^^ XIdent |
-  "borderRadius" ~> ":" ~> valueDecl ^^ BorderRadiusIdent |
-        "borderWidth" ~> ":" ~> valueDecl ^^ BorderWidthIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
-        "point" ~> ":" ~> "Align"~>"."~>("center" | "left" | "right")  ^^ PointIdent |
-        "visible" ~> ":" ~> identifier ^^ VisibleIdent |
+      "borderRadius" ~> ":" ~> valueDecl ^^ BorderRadiusIdent |
+      "borderWidth" ~> ":" ~> valueDecl ^^ BorderWidthIdent |
+      "point" ~> ":" ~> "Align" ~> "." ~> ("center" | "left" | "right") ^^ PointIdent |
+      "visible" ~> ":" ~> identifier ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
-       "width" ~> ":" ~> widthValueDecl ^^ WidthIdent |
-        ("scrollVertical" ~> ":") ~> ("true"|"false" )^^ ScrollVerticalIdent |
+      "width" ~> ":" ~> widthValueDecl ^^ WidthIdent |
+      ("scrollVertical" ~> ":") ~> ("true" | "false") ^^ ScrollVerticalIdent |
+      ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "height" ~> ":" ~> widthValueDecl ^^ HeightIdent |
-      "size"~>":" ~> (identifier <~ "." <~ "size")  ^^ SizeIdent |
+      "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ~> styleParaType
 
   lazy val styleParaType: Parser[TermTree] =
@@ -119,16 +127,16 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
 
   lazy val addPageDecl: Parser[DeclTree] =
-  (identifier <~ "." <~"addPage" <~"(") ~ (identifier <~",")~ stringLit <~ ")" ^^ AddPageIdent
+    (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
   lazy val widthValueDecl: Parser[ValueTree] =
     (numericLit ^^ ValueIdent |
-      (identifier <~ ".") ~ ("width"|"height") ^^ ValueWithIdent
+      (identifier <~ ".") ~ ("width" | "height") ^^ ValueWithIdent
       )
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ ValueIdent |
-      "Align" ~> "." ~> ("center" | "left" | "right") ^^ ValueIdent
+      "Align" ~> "." ~> ("center" | "left" | "right"|"top") ~ opt("-"|"+" ) ~ opt(numericLit) ^^ Value3Ident
       )
 
   lazy val ambientVarDecl: Parser[DeclTree] =

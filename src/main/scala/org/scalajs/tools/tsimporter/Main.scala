@@ -27,7 +27,7 @@ object Main {
 //      System.exit(1)
 //    }
 
-    val inputFileName = "input.ts"
+    val inputFileName = "input.coffee"
     val outputFileName = "out.html"
     val outputFileName1 = "out.css"
     val outputPackage = if (args.length > 2) args(2) else "importedjs"
