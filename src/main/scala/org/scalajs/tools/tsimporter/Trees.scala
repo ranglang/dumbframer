@@ -125,15 +125,17 @@ object Trees {
     override def name: String = "x"
   }
 
+  case class ScrollVerticalIdent(bool: String) extends ValueTree with PropertyName {
+    override def name: String = "scrollVertical"
+  }
+
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
   case class ValueIdent(name: String) extends ValueTree with PropertyName {
   }
 
-  case class ValueWithIdent(content: Ident) extends ValueTree
-//    with PropertyName {
-//  }
+  case class ValueWithIdent(content: Ident, value: String) extends ValueTree
 
   case class Ident(name: String) extends Tree with PropertyName {
     Ident.requireValidIdent(name)

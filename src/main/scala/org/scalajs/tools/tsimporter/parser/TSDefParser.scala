@@ -41,7 +41,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "Import","file",
     "PageComponent","Framer","Importer","load"
     ,"on","Events","event","layer","Click","addPage",
-    "snapToPage","new","visible"
+    "snapToPage","new","visible","height","scrollVertical"
   )
 
   lexical.delimiters ++= List(
@@ -109,12 +109,10 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
        "width" ~> ":" ~> widthValueDecl ^^ WidthIdent |
+        ("scrollVertical" ~> ":") ~> ("true"|"false" )^^ ScrollVerticalIdent |
       "height" ~> ":" ~> widthValueDecl ^^ HeightIdent |
       "size"~>":" ~> (identifier <~ "." <~ "size")  ^^ SizeIdent |
       "style" ~> ":" ~> styleParaType
-
-//  lazy val styleParaType: Parser[Boolean] =
-//    "true" ^^ success(true)
 
   lazy val styleParaType: Parser[TermTree] =
     stringLit ~ (":" ~> stringLit) ^^ StyleIdent
@@ -125,7 +123,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val widthValueDecl: Parser[ValueTree] =
     (numericLit ^^ ValueIdent |
-      identifier <~ "." <~ "width" ^^ ValueWithIdent
+      (identifier <~ ".") ~ ("width"|"height") ^^ ValueWithIdent
       )
 
   lazy val valueDecl: Parser[ValueTree] =
