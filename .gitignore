@@ -1,0 +1,8 @@
+project/project/target/
+.idea
+target
+.DS_Store
+factorials.txt 
+input.coffee
+out.*
+images/
