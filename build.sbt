@@ -20,8 +20,8 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
-    "org.scalatest"     %% "scalatest" % scalaTestV % "test",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2"
+    "org.scalatest"     %% "scalatest" % scalaTestV , //% "test",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
   )
 }
 

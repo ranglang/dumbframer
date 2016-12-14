@@ -2,9 +2,18 @@ package test
 
 import akka.stream._
 import akka.stream.scaladsl._
-import akka.{ NotUsed, Done }
-import akka.actor.ActorSystem
+import akka.{Done, NotUsed}
+import akka.actor.{ActorSystem, Cancellable}
 import akka.util.ByteString
+import akka.testkit.TestActorRef
+import scala.concurrent.duration._
+import scala.concurrent.Await
+import akka.pattern.ask
+
+import org.scalatest._
+import org.scalatest.durations._
+import org.scalatest._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import java.nio.file.Paths
@@ -16,6 +25,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Stream extends  App {
   implicit val system = ActorSystem("QuickStart")
   implicit val materializer = ActorMaterializer()
+
+  val a = List(1,2,3)
+  val r = a.fold("")((left,right) => left.toString +right)
+  Console.println(r);
+
+  val r1 = a.reduce((a,b)=>a +b)
+  Console.println(r1);
 
   val source: Source[Int, NotUsed] = Source(1 to 100)
   source.runForeach(i => println(i))(materializer)
@@ -47,15 +63,6 @@ object Stream extends  App {
 
   val hashtags: Source[Hashtag, NotUsed] = tweets.mapConcat(_.hashtags.toList)
 
-//  val authors: Source[Author, NotUsed] =
-//    tweets
-//      .filter(_.hashtags.contains(akkaTag))
-//      .map(_.author)
-
-//  hashtags.runWith(Sink.foreach(println))
-
-//  implicit val system1 = ActorSystem("QuickStart1")
-//  implicit val materializer1 = ActorMaterializer()
   val count: Flow[Tweet, Int, NotUsed] = Flow[Tweet].map(_ => 1)
 
   val sumSink: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)

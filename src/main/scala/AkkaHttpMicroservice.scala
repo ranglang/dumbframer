@@ -9,10 +9,11 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{ActorMaterializer, Materializer}
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.{Flow, Sink, Source, StreamConverters}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import java.io.IOException
+import java.io.{BufferedReader, IOException, InputStreamReader}
+import java.util.concurrent.TimeUnit
 
 import akka.util.ByteString
 
@@ -20,6 +21,10 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
 import spray.json.DefaultJsonProtocol
 import tsimporter.Main
+
+import scala.collection.immutable.PagedSeq
+import scala.concurrent.duration.FiniteDuration
+import scala.util.parsing.input.PagedSeqReader
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 
@@ -56,10 +61,13 @@ trait Protocols extends DefaultJsonProtocol {
 
 trait Service extends Protocols {
   implicit val system: ActorSystem
+
   implicit def executor: ExecutionContextExecutor
+
   implicit val materializer: Materializer
 
   def config: Config
+
   val logger: LoggingAdapter
 
   lazy val ipApiConnectionFlow: Flow[HttpRequest, HttpResponse, Any] =
@@ -89,61 +97,37 @@ trait Service extends Protocols {
           complete {
 
             formdata.parts.mapAsync(1) { p ⇒
-              println(s"Got part. name: ${p.name} filename: ${p.filename}")
-
-              println("Counting size...")
-              @volatile var lastReport = System.currentTimeMillis()
-              @volatile var lastSize = 0L
-              def receiveChunk(counter: (Long, Long), chunk: ByteString): (Long, Long) = {
-                val (oldSize, oldChunks) = counter
-                val newSize = oldSize + chunk.size
-                val newChunks = oldChunks + 1
-
-                val now = System.currentTimeMillis()
-                if (now > lastReport + 1000) {
-                  val lastedTotal = now - lastReport
-                  val bytesSinceLast = newSize - lastSize
-                  val speedMBPS = bytesSinceLast.toDouble / 1000000 /* bytes per MB */ / lastedTotal * 1000 /* millis per second */
-
-                  println(f"Already got $newChunks%7d chunks with total size $newSize%11d bytes avg chunksize ${newSize / newChunks}%7d bytes/chunk speed: $speedMBPS%6.2f MB/s")
-
-                  lastReport = now
-                  lastSize = newSize
-                }
-                (newSize, newChunks)
-              }
-
-//              Main.a(p.entity.dataBytes)
-              p.entity.dataBytes.runFold((0L, 0L))(receiveChunk).map {
-                case (size, numChunks) ⇒
-                  println(s"Size is $size")
-                  (p.name, p.filename, size)
-              }
-            }.runFold(Seq.empty[(String, Option[String], Long)])(_ :+ _).map(_.mkString(", "))
+              val inputStream = p.entity.dataBytes.runWith(
+                StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
+              )
+              val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
+              val a = new PagedSeqReader(reader);
+              Future.successful(Main.a(a))
+            }.runFold("")((a, b) => a + b)
           }
         }
       } ~
-      pathPrefix("ip") {
-        (get & path(Segment)) { ip =>
-          complete {
-            fetchIpInfo(ip).map[ToResponseMarshallable] {
-              case Right(ipInfo) => ipInfo
-              case Left(errorMessage) => BadRequest -> errorMessage
+        pathPrefix("ip") {
+          (get & path(Segment)) { ip =>
+            complete {
+              fetchIpInfo(ip).map[ToResponseMarshallable] {
+                case Right(ipInfo) => ipInfo
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
             }
-          }
-        } ~
-        (post & entity(as[IpPairSummaryRequest])) { ipPairSummaryRequest =>
-          complete {
-            val ip1InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip1)
-            val ip2InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip2)
-            ip1InfoFuture.zip(ip2InfoFuture).map[ToResponseMarshallable] {
-              case (Right(info1), Right(info2)) => IpPairSummary(info1, info2)
-              case (Left(errorMessage), _) => BadRequest -> errorMessage
-              case (_, Left(errorMessage)) => BadRequest -> errorMessage
+          } ~
+            (post & entity(as[IpPairSummaryRequest])) { ipPairSummaryRequest =>
+              complete {
+                val ip1InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip1)
+                val ip2InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip2)
+                ip1InfoFuture.zip(ip2InfoFuture).map[ToResponseMarshallable] {
+                  case (Right(info1), Right(info2)) => IpPairSummary(info1, info2)
+                  case (Left(errorMessage), _) => BadRequest -> errorMessage
+                  case (_, Left(errorMessage)) => BadRequest -> errorMessage
+                }
+              }
             }
-          }
         }
-      }
     }
   }
 }
@@ -152,7 +136,6 @@ object AkkaHttpMicroservice extends App with Service {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
-
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
