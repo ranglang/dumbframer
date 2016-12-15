@@ -40,21 +40,26 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
   }
 
   def getLayer(name: Name): LayerSymbol = {
-
+    println("getLayer"+ name)
+    println(members.toList)
     @tailrec def get(list: ListBuffer[Symbol], ret: ListBuffer[Symbol]) :ListBuffer[Symbol]= {
       if( list.isEmpty)
         ret
       else {
         val current = list.head
+        println("current")
+        println(current)
          current match {
-          case LayerSymbol(name,params,members) =>  get(list.drop(1).++(members), ret.+=(current))
-          case PageSymbol(name,params, members) => get(list.drop(1).++(members), ret.+=(current))
-          case _ => ret
+          case LayerSymbol(name,params,members) =>  get(list.drop(1).++(members), ret+=current)
+          case PageSymbol(name,params, members) => get(list.drop(1).++(members), ret+=current)
+          case _ => get(list.drop(1),ret)
         }
       }
     }
 
     val b = get(members, ListBuffer.empty[Symbol]);
+    println("all members");
+    println(b)
       val optMembers = b.collectFirst {
         case sym: LayerSymbol if sym.name == name => sym
       }

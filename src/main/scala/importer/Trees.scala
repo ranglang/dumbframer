@@ -20,16 +20,6 @@ object Trees {
     def name: String
   }
 
-  object PropertyName {
-    def apply(name: String): PropertyName = {
-      if (Ident.isValidIdentifier(name)) Ident(name)
-      else StringLiteral(name)
-    }
-
-    def unapply(tree: PropertyName): Some[String] =
-      Some(tree.name)
-  }
-
   case class AnnotationIdent(annotation: String, file: DeclTree) extends DeclTree with PropertyName {
     override def name: String = "annotation"
   }
@@ -58,8 +48,16 @@ object Trees {
     override def name: String = "html"
   }
 
+
   case class SetProgressIdent(paraName: List[Ident], paraValue: String) extends DeclTree with PropertyName {
     override def name: String = "setProgress"
+  }
+
+  case class SetVisibleIdent(paraName: List[_], paraValue: ValueTree) extends DeclTree with PropertyName {
+    override def name: String = "setVisible"
+  }
+  case class SetParentIdent(paraName: List[Ident], paraValue: Ident) extends DeclTree with PropertyName {
+    override def name: String = "setParent"
   }
 
   case class SnapToIdent(source: Ident, target: Ident) extends DeclTree with PropertyName {
@@ -128,6 +126,8 @@ object Trees {
   case class ValueIdent(name: String) extends ValueTree with PropertyName {
   }
 
+  case class BooleanValueIdent(name: BooleanLiteral ) extends ValueTree
+
   case class Value3Ident(name: String, calculate: Option[String], num: Option[String]) extends ValueTree with PropertyName {
   }
 
@@ -157,10 +157,10 @@ object Trees {
 
   sealed trait Literal extends TermTree
   case class BooleanLiteral(value: Boolean) extends Literal
-  case class NumberLiteral(value: Double) extends Literal
-  case class StringLiteral(value: String) extends Literal with PropertyName {
-    override def name = value
-  }
+//  case class NumberLiteral(value: Double) extends Literal
+//  case class StringLiteral(value: String) extends Literal with PropertyName {
+//    override def name = value
+//  }
 
   sealed abstract class BaseTypeRef extends Tree
 }

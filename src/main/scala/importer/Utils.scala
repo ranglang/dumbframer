@@ -15,15 +15,6 @@ object Utils {
       ident.isEmpty ||
       (!ident.head.isUnicodeIdentifierStart && ident.head != '_') ||
       !ident.tail.forall(_.isUnicodeIdentifierPart)
-//      isScalaKeyword(ident)
   )
-
-//  val isScalaKeyword: Set[String] = Set(
-//      "abstract", "case", "class", "catch", "def", "do", "else", "extends",
-//      "false", "final", "finally", "for", "forSome", "if", "implicit",
-//      "import", "lazy", "match", "new", "null", "object", "override",
-//      "package", "private", "protected", "return", "sealed", "super", "this",
-//      "throw", "trait", "true", "try", "type", "val", "var", "with", "while",
-//      "yield", ".", "_", ":", "=", "=>", "<-", "<:", "<%", ">:",  "@")
 
 }

@@ -29,24 +29,28 @@ object Printer {
             head
           case layer: LayerSymbol =>
             if (s(layer)) {
-              factorialAcc(slice.drop(1), head + layer.name.name)
+              val content = "<div>"+layer.name.name + "</div>"
+              factorialAcc(slice.drop(1), head + content)
             } else {
               s = s.+(layer)
               if (!layer.members.isEmpty) {
-                factorialAcc(slice.pushAll(layer.members), head)
+                factorialAcc(slice.pushAll(layer.members),head)
               } else {
-                factorialAcc(slice.drop(1), head + layer.name.name)
+                val content = "<div>"+layer.name.name + "</div>"
+                factorialAcc(slice.drop(1), head + content)
               }
             }
           case comment: CommentSymbol =>
             slice.pop();
-            factorialAcc(slice, head + comment.name.name)
+            val s = "<!-->"+comment.name.name + "</-->"
+            factorialAcc(slice, head + s)
           case layer: TextSymbol =>
             slice.pop()
             factorialAcc(slice, head + layer.name.name)
           case layer: NotSupportSymbol =>
             layer.value
           case a: Symbol =>
+            println(a);
             head
         }
       }

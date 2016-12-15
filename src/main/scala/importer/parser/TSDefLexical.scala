@@ -24,7 +24,10 @@ class TSDefLexical extends Lexical with StdTokens with ImplicitConversions {
 
   def identifier =
     stringOf1(identifierStart, identifierPart) ^^ {
-      x => if (reserved contains x) Keyword(x) else Identifier(x)
+      x => {
+        val a = if (reserved contains x) Keyword(x) else Identifier(x)
+         a
+      }
     }
 
   def identifierStart =

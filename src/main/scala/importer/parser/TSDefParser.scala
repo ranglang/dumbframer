@@ -21,12 +21,13 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     // Value keywords
     "true", "false",
     // Additional keywords of FramerJs
-    "Layer",    "width",    "x",    "y",    "html",    "style",
-    "parent",    "height",    "backgroundColor",    "Align",    "center",    "left",
-    "top",    "point",    "size",    "right",    "image",    "Import", "file",    "PageComponent", "Framer", "Importer", "load"
+    "Layer", "width", "x", "y", "html", "style",
+    "parent", "height", "backgroundColor", "Align", "center", "left",
+    "top", "point", "size", "right", "image", "Import", "file", "PageComponent", "Framer", "Importer", "load"
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
-    "title", "author", "twitter", "description", "Info"
+    "title", "author", "twitter", "description", "Info",
+    "borderWidth"
   )
 
   lexical.delimiters ++= List(
@@ -48,27 +49,30 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val moduleElementDecl1: Parser[DeclTree] = (
     framerLayerDecl |
       framerPageDecl |
-      annotationDecl |
       EventDecl |
       addPageDecl |
       snapToDecl |
-      framerImporterDecl |
       setProgressDecl |
-      frameInfoDecl
-//      sketch.login.parent = pageLogin
+      setParentDecl |
+      frameInfoDecl |
+      framerImporterDecl |
+      setVisibleDecl
     )
 
   lazy val frameInfoDecl: Parser[DeclTree] =
     ("Framer" ~> "." ~> "Info" ~> "=" ~> "title" ~> ":" ~> stringLit) ~ ("author" ~> ":" ~> stringLit) ~ ("twitter" ~> ":" ~> stringLit) ~ ("description" ~> ":" ~> stringLit) ^^ FramerInfo
 
   lazy val framerImporterDecl: Parser[DeclTree] =
-    identifier ~> "=" ~> "Framer" ~> "." ~> "Importer" ~> "." ~> "load" ~> "(" ~> stringLiteral ~> ")" ^^ ImportFileIdent
+    identifier ~> "=" ~> "Framer" ~> "." ~> "Importer" ~> "." ~> "load" ~> "(" ~> stringLit ~> ")" ^^ ImportFileIdent
 
   lazy val setProgressDecl: Parser[DeclTree] =
     repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
 
-  lazy val annotationDecl: Parser[DeclTree] =
-    "#" ~> "Import" ~> "file" ~> stringLit ~ framerImporterDecl ^^ AnnotationIdent
+  lazy val setParentDecl: Parser[DeclTree] =
+    repsep(identifier, ".") ~ ("parent" ~> "=" ~> identifier) ^^ SetParentIdent
+
+  lazy val setVisibleDecl: Parser[DeclTree] =
+    rep1(rep(identifier <~ "."), "visible") ~ ("=" ~> valueDecl) ^^ SetVisibleIdent
 
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
@@ -81,7 +85,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val parameterBody: Parser[List[TermTree]] =
     rep(paraType)
-
 
   lazy val paraType: Parser[TermTree] =
     "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
@@ -104,7 +107,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val styleParaType: Parser[TermTree] =
     stringLit ~ (":" ~> stringLit) ^^ StyleIdent
 
-
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
@@ -115,6 +117,10 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ ValueIdent |
+      ("true" | "false") ^^ {
+        case "true" => BooleanLiteral(true)
+        case "false" => BooleanLiteral(false)
+      } ^^ BooleanValueIdent |
       "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident
       )
 
@@ -125,14 +131,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     accept("IdentifierName", {
       case lexical.Identifier(chars) => chars
       case lexical.Keyword(chars) if chars.forall(Character.isLetter) => chars
-      case a: Elem => {
+      case _ => {
         ""
       }
     })
-
-  lazy val propertyName: Parser[PropertyName] =
-    identifier | stringLiteral
-
-  lazy val stringLiteral: Parser[StringLiteral] =
-    stringLit ^^ StringLiteral
 }
