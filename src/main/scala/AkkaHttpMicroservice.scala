@@ -25,6 +25,9 @@ import tsimporter.Main
 import scala.collection.immutable.PagedSeq
 import scala.concurrent.duration.FiniteDuration
 import scala.util.parsing.input.PagedSeqReader
+import akka.http.scaladsl.server.directives.ExecutionDirectives._
+import ch.megard.akka.http.cors.CorsDirectives._
+import ch.megard.akka.http.cors.CorsSettings
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 
@@ -103,7 +106,9 @@ trait Service extends Protocols {
               val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
               val a = new PagedSeqReader(reader);
               Future.successful(Main.a(a))
-            }.runFold("")((a, b) => a + b)
+            }.runFold("")((a, b) =>{
+              Console.println("...")
+              a + b})
           }
         }
       } ~
@@ -139,5 +144,6 @@ object AkkaHttpMicroservice extends App with Service {
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
-  Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
+  val settings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true)
+  Http().bindAndHandle(cors(settings)(routes), config.getString("http.interface"), config.getInt("http.port"))
 }
