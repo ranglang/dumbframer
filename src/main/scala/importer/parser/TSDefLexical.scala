@@ -3,7 +3,7 @@
  * @author  Sébastien Doeraene
  */
 
-package tsimporter.parser
+package importer.parser
 
 import scala.collection.mutable.HashSet
 import scala.util.parsing.combinator._

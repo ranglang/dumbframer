@@ -3,7 +3,7 @@
  * @author  Sébastien Doeraene
  */
 
-package tsimporter
+package importer
 
 object Utils {
 

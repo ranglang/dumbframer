@@ -20,7 +20,7 @@ import akka.util.ByteString
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
 import spray.json.DefaultJsonProtocol
-import tsimporter.Main
+import importer.FramerParser
 
 import scala.collection.immutable.PagedSeq
 import scala.concurrent.duration.FiniteDuration
@@ -98,14 +98,13 @@ trait Service extends Protocols {
       path("upload") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
-
             formdata.parts.mapAsync(1) { p ⇒
               val inputStream = p.entity.dataBytes.runWith(
                 StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
               )
               val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
               val a = new PagedSeqReader(reader);
-              Future.successful(Main.a(a))
+              Future.successful(FramerParser.parse(a))
             }.runFold("")((a, b) =>{
               Console.println("...")
               a + b})

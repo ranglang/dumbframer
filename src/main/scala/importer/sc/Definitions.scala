@@ -3,10 +3,10 @@
  * @author  Sébastien Doeraene
  */
 
-package tsimporter.sc
+package importer.sc
 
-import tsimporter.Trees.TermTree
-import tsimporter.Utils
+import importer.Trees.TermTree
+import importer.Utils
 
 import scala.annotation.tailrec
 import scala.collection.mutable._
@@ -17,7 +17,6 @@ case class Name(name: String) {
 }
 
 object Name {
-  val scala = Name("scala")
   val EMPTY = Name("")
 }
 
@@ -83,6 +82,9 @@ class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
 
 
 case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends Symbol(nme) {
+}
+
+case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {
 }
 
 case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {

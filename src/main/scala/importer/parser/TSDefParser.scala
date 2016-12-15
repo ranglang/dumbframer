@@ -3,9 +3,9 @@
  * @author  Sébastien Doeraene
  */
 
-package tsimporter.parser
+package importer.parser
 
-import tsimporter.Trees._
+import importer.Trees._
 
 import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.syntactical._
@@ -21,25 +21,9 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     // Value keywords
     "true", "false",
     // Additional keywords of FramerJs
-    "Layer",
-    "width",
-    "x",
-    "y",
-    "html",
-    "style",
-    "parent",
-    "height",
-    "backgroundColor",
-    "Align",
-    "center",
-    "left",
-    "top",
-    "point",
-    "size",
-    "right",
-    "image",
-    "Import", "file",
-    "PageComponent", "Framer", "Importer", "load"
+    "Layer",    "width",    "x",    "y",    "html",    "style",
+    "parent",    "height",    "backgroundColor",    "Align",    "center",    "left",
+    "top",    "point",    "size",    "right",    "image",    "Import", "file",    "PageComponent", "Framer", "Importer", "load"
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
     "title", "author", "twitter", "description", "Info"
@@ -61,17 +45,17 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> "Click" ~> "," ~> "(" ~> "event" ~> "," ~> "layer" ~> ")" ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
 
 
-
   lazy val moduleElementDecl1: Parser[DeclTree] = (
-        framerLayerDecl |
-          framerPageDecl |
-          annotationDecl |
-          EventDecl |
-          addPageDecl |
-          snapToDecl |
-          framerImporterDecl |
-          setProgressDecl |
-          frameInfoDecl
+    framerLayerDecl |
+      framerPageDecl |
+      annotationDecl |
+      EventDecl |
+      addPageDecl |
+      snapToDecl |
+      framerImporterDecl |
+      setProgressDecl |
+      frameInfoDecl
+//      sketch.login.parent = pageLogin
     )
 
   lazy val frameInfoDecl: Parser[DeclTree] =
@@ -133,20 +117,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     (numericLit ^^ ValueIdent |
       "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident
       )
-  lazy val repeatedParamMarker =
-    opt("...") ^^ (_.isDefined)
-
-  lazy val optionalMarker =
-    opt("?") ^^ (_.isDefined)
-
-
-//  lazy val maybeStaticPropName: Parser[(PropertyName, Boolean)] = (
-//    "static" ~> propertyName ^^ staticPropName
-//      | propertyName ^^ nonStaticPropName
-//    )
-//
-//  val staticPropName = (p: PropertyName) => (p, true)
-//  val nonStaticPropName = (p: PropertyName) => (p, false)
 
   lazy val identifier =
     identifierName ^^ Ident
@@ -165,8 +135,4 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val stringLiteral: Parser[StringLiteral] =
     stringLit ^^ StringLiteral
-
-//  private val isCoreTypeName =
-//    Set("any", "void", "number", "bool", "boolean", "string", "null", "undefined")
-
 }
