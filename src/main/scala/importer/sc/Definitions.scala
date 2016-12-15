@@ -67,7 +67,7 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
   }
 }
 
-class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
+case class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
   override def toString() = s"package $name"
 
   def findPackage(name: Name): Option[PackageSymbol] = {

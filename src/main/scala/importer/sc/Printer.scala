@@ -13,80 +13,73 @@ object Printer {
 
   final def printSymbol(initialSym: Symbol, head: String): String = {
 
-    val hashMap: mutable.HashMap[Int,mutable.Stack[Symbol]] = new mutable.HashMap[Int,mutable.Stack[Symbol]]()
+    val hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
     var s: Set[Symbol] = Set()
-    @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int,mutable.Stack[Symbol]], head: String): String = {
-      if(current.equals(1) && hashMap.get(current).size.equals(0)) head
+    @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], head: String): String = {
+
+      println("factorialAcc ")
+      if (current.equals(0)) {
+        // && hashMap.get(0).size.equals(0)){
+        println("return ")
+        head
+      }
       else {
+        println("continute ")
         hashMap(current).length match {
-          case 0 =>
-            factorialAcc(current-1,hashMap,head+"/div")
-          case 1 =>
-            val a  = hashMap(current).pop()
+          case a: Int if a == 0 =>
+            println("hashMap.length == 0")
+            factorialAcc(current - 1, hashMap, head + "</div>")
+          case a: Int if a == 1 =>
+            println("hashMap.length == 1")
+            println("hashMap(current).length): " + hashMap(current).length)
+            val a = hashMap(current).pop()
+            println("hashMap(current).length): " + hashMap(current).length)
             a match {
+              case layer: PackageSymbol =>
+                println("package members" + layer.members)
+                layer.members.isEmpty match {
+                  case true =>
+                    println("is Empty")
+                    factorialAcc(current - 1, hashMap, head + "<div>" + layer.name.name + "</div>" + "</div>")
+                  case false =>
+                    println("Not Empty")
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, head + "<div>" + layer.name.name)
+                }
               case layer: LayerSymbol =>
                 layer.members.isEmpty match {
                   case true =>
-                    factorialAcc(current-1,hashMap,head+"<div>"+layer.name+"</>"+"/div")
+                    println("is Empty")
+                    factorialAcc(current - 1, hashMap, head + "<div>" + layer.name.name + "</div>" + "</div>")
                   case false =>
-                    val  s =  mutable.Stack(layer.members:_*)
-                    val nh= hashMap.+=((1,s))
-                    factorialAcc(current+1,nh,head+"<div>"+layer.name)
+                    println("Not Empty")
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, head + "<div>" + layer.name.name)
                 }
-              case sy:Symbol =>
-                factorialAcc(current-1,hashMap,head+"<div>"+sy.name+"</>"+"/div")
+              case sy: Symbol =>
+                println("otherSymbole")
+                println("other: " + sy)
+                factorialAcc(current - 1, hashMap, head + "<div>" + sy.name.name + "</div>" + "</div>")
             }
+          case a: Int if a > 1 =>
+            println("hashMap.length > 1")
+            val a = hashMap(current).pop()
+            factorialAcc(current, hashMap, head + "<div>" + a.name.name + "</div>" + "</div>")
           case _ =>
-            val a  = hashMap(current).pop()
-            factorialAcc(current,hashMap,head+"<div>"+a.name+"</>"+"/div")
+            println("else")
+            ""
         }
       }
-//      if (slice.isEmpty) head
-//      else {
-//        val sym = slice.head
-//        sym match {
-//          case sym: PackageSymbol =>
-//            slice.pop();
-//            if (!sym.members.isEmpty) {
-//              factorialAcc(slice.pushAll(sym.members), head)
-//            } else
-//              head
-//          case PageSymbol(name, params, list) =>
-//            slice.pop();
-//            head
-//          case layer: LayerSymbol =>
-//            if (s(layer)) {
-//              val content = "<div>"+layer.name.name + "</div>"
-//              factorialAcc(slice.drop(1), head + content)
-//            } else {
-//              s = s.+(layer)
-//              if (!layer.members.isEmpty) {
-//                factorialAcc(slice.pushAll(layer.members),head)
-//              } else {
-//                val content = "<div>"+layer.name.name + "</div>"
-//                factorialAcc(slice.drop(1), head + content)
-//              }
-//            }
-//          case comment: CommentSymbol =>
-//            slice.pop();
-//            val s = "<!-->"+comment.name.name + "</-->"
-//            factorialAcc(slice, head + s)
-//          case layer: TextSymbol =>
-//            slice.pop()
-//            factorialAcc(slice, head + layer.name.name)
-//          case layer: NotSupportSymbol =>
-//            layer.value
-//          case a: Symbol =>
-//            println(a);
-//            head
-//        }
-//      }
     }
 
-    val initailStack:mutable.Stack[Symbol] =  mutable.Stack(initialSym)
-    val hm: mutable.HashMap[Int,mutable.Stack[Symbol]] = new mutable.HashMap[Int,mutable.Stack[Symbol]]()
-    hm.put(0,initailStack)
-     factorialAcc(0,hm, head)
+    val initailStack: mutable.Stack[Symbol] = mutable.Stack(initialSym)
+    val hm: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
+    hm.put(1, initailStack)
+    println("hm.size: " + hm.size);
+    println(hm.size);
+    factorialAcc(1, hm, head)
   }
 }
 
