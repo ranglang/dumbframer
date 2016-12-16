@@ -46,7 +46,7 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
       else {
         val current = list.head
          current match {
-          case LayerSymbol(name,params,members) =>  get(list.drop(1).++(members), ret+=current)
+          case LayerSymbol(name,params,members,opts) =>  get(list.drop(1).++(members), ret+=current)
           case PageSymbol(name,params, members) => get(list.drop(1).++(members), ret+=current)
           case _ => get(list.drop(1),ret)
         }
@@ -85,7 +85,7 @@ case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends 
 
 case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {
 }
-case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
+case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer(), parentOpt: Option[String]) extends Symbol(nme) {
 }
 case class PageSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }

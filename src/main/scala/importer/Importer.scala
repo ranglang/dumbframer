@@ -8,6 +8,8 @@ package importer
 import importer.Trees._
 import importer.sc._
 
+import scala.collection.mutable.ListBuffer
+
 /** The meat and potatoes: the importer
  *  It reads the TypeScript AST and produces (hopefully) equivalent Scala
  *  code.
@@ -39,10 +41,10 @@ class Importer() {
               case str: ParentIdent => str
             } match {
               case Some(parentIdent) =>
-                  owner.getLayer(Name(parentIdent.value.name)).members += new LayerSymbol(name, params);
+                  owner.getLayer(Name(parentIdent.value.name)).members += new LayerSymbol(name, params,ListBuffer(), Some(parentIdent.value.name));
               case  None =>
                 println("add number:"+name)
-                owner.members += new LayerSymbol(name, params);
+                owner.members += new LayerSymbol(name, params,ListBuffer(),Option.empty[String]);
             }
           }
          }

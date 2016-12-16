@@ -66,8 +66,9 @@ object Printer {
               case layer: LayerSymbol =>
                 layer.members.isEmpty match {
                   case true =>
+                    val parent = layer.parentOpt.map(s => "."+s).getOrElse("")
                     factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<div class=\"" + layer.name.name +"\"></div></div>",
-                      params2CssString(layer.params, parseResult.css+ "."+ layer.name.name +"{"+"\n")+ "}"))
+                      params2CssString(layer.params, parseResult.css+parent+ "."++ layer.name.name +"{"+"\n")+ "}"))
                   case false =>
                     val s = mutable.Stack(layer.members: _*)
                     val nh = hashMap.+=((current + 1, s))

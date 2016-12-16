@@ -12,13 +12,13 @@ import scala.collection.mutable.ListBuffer
 class ParserDataSpec extends  FlatSpec with Matchers{
 
   "PrintSymbol" should "respond should be single" in {
-    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List.empty[TermTree]))
+    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List.empty[TermTree],ListBuffer(),Option.empty[String]))
     parserResult.html should be ("<div><div class=\"A\"></div></div>")
     parserResult.css should be (".A{"+"\n"+"}")
   }
 
   "PrintSymbol" should "respond should be has css" in {
-    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"), List(new XIdent(StringIdent("7")))))
+    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"), List(new XIdent(StringIdent("7"))),ListBuffer(),Option.empty[String]))
     parserResult.html should be ("<div><div class=\"A\"></div></div>")
     parserResult.css should be (".A{"+"\n"+"x: 7px;"+"\n}")
   }
@@ -40,10 +40,15 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     Printer.params2CssString(List(new XIdent(StringIdent("7")), new VisibleIdent(false)),"") should be ("x: 7px;\ndisplay: hidden;\n")
   }
 
-
   "PrintSymbol" should "respond should has css" in {
-    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List(WidthIdent(StringIdent("7")))))
+    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List(WidthIdent(StringIdent("7"))),ListBuffer(),Option.empty[String]))
     parserResult.html should be ("<div><div class=\"A\"></div></div>")
     parserResult.css should be (".A{"+"\nwidth: 7px;"++"\n}")
+  }
+
+  "PrintSymbol" should "respond should has parent" in {
+    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List(WidthIdent(StringIdent("7"))),ListBuffer(), Some("B")))
+    parserResult.html should be ("<div><div class=\"A\"></div></div>")
+    parserResult.css should be (".B.A{"+"\nwidth: 7px;"++"\n}")
   }
 }
