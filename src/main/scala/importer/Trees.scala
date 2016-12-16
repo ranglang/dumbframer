@@ -45,7 +45,7 @@ object Trees {
   }
 
   case class StyleIdent(paraName: String, paraValue: String) extends TermTree with PropertyName {
-    override def name: String = "html"
+    override def name: String = "style"
   }
 
 
@@ -80,41 +80,22 @@ object Trees {
     override def name: String = "parent"
   }
 
-  case class WidthIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "width"
-  }
+  case class WidthIdent(value: ValueTree) extends TermTree
 
-  case class BackGroundColorIdent(value: String) extends TermTree with PropertyName {
-    override def name: String = "backgroundColor"
-  }
+  case class BackGroundColorIdent(value: String) extends TermTree
 
-  case class VisibleIdent(string: Ident) extends TermTree with PropertyName {
-    override def name: String = "visiable"
-  }
+  case class VisibleIdent(isVisible: Boolean) extends TermTree
 
-  case class HeightIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "width"
-  }
+  case class HeightIdent(value: ValueTree) extends TermTree
 
-  case class BorderWidthIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "borderWidth"
-  }
+  case class BorderWidthIdent(value: ValueTree) extends TermTree
 
-  case class BorderRadiusIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "borderRadius"
-  }
+  case class BorderRadiusIdent(value: ValueTree) extends TermTree
 
-  case class YIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "y"
-  }
+  case class YIdent(value: ValueTree) extends TermTree
+  case class XIdent(value: ValueTree) extends TermTree
 
-  case class XIdent(value: ValueTree) extends TermTree with PropertyName {
-    override def name: String = "x"
-  }
-
-  case class ScrollVerticalIdent(bool: String) extends ValueTree with PropertyName {
-    override def name: String = "scrollVertical"
-  }
+  case class ScrollVerticalIdent(bool: ValueTree) extends TermTree
 
   case class ClipIdent(bool: String) extends ValueTree with PropertyName {
     override def name: String = "scrollVertical"
@@ -123,10 +104,9 @@ object Trees {
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
-  case class ValueIdent(name: String) extends ValueTree with PropertyName {
-  }
+  case class StringIdent(name: String) extends ValueTree
 
-  case class BooleanValueIdent(name: BooleanLiteral ) extends ValueTree
+  case class BooleanValueIdent(name: Boolean ) extends ValueTree
 
   case class Value3Ident(name: String, calculate: Option[String], num: Option[String]) extends ValueTree with PropertyName {
   }
@@ -156,7 +136,7 @@ object Trees {
   case class NotSupportedDecl(name: String) extends DeclTree
 
   sealed trait Literal extends TermTree
-  case class BooleanLiteral(value: Boolean) extends Literal
+//  case class BooleanLiteral(value: Boolean) extends Literal
 //  case class NumberLiteral(value: Double) extends Literal
 //  case class StringLiteral(value: String) extends Literal with PropertyName {
 //    override def name = value

@@ -87,20 +87,24 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     rep(paraType)
 
   lazy val paraType: Parser[TermTree] =
-    "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
+      "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
       "x" ~> ":" ~> valueDecl ^^ XIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
       "borderRadius" ~> ":" ~> valueDecl ^^ BorderRadiusIdent |
       "borderWidth" ~> ":" ~> valueDecl ^^ BorderWidthIdent |
       "point" ~> ":" ~> "Align" ~> "." ~> ("center" | "left" | "right") ^^ PointIdent |
-      "visible" ~> ":" ~> identifier ^^ VisibleIdent |
+      "visible" ~> ":" ~>
+        ("true" | "false") ^^ {
+        case "true" => true
+        case "false" => false
+      } ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
-      "width" ~> ":" ~> widthValueDecl ^^ WidthIdent |
-      ("scrollVertical" ~> ":") ~> ("true" | "false") ^^ ScrollVerticalIdent |
+      "width" ~> ":" ~> valueDecl ^^ WidthIdent |
+       "height" ~> ":" ~> valueDecl ^^ HeightIdent |
+      ("scrollVertical" ~> ":") ~> valueDecl ^^ ScrollVerticalIdent |
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
-      "height" ~> ":" ~> widthValueDecl ^^ HeightIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ~> styleParaType
 
@@ -110,18 +114,15 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
-  lazy val widthValueDecl: Parser[ValueTree] =
-    (numericLit ^^ ValueIdent |
-      (identifier <~ ".") ~ ("width" | "height") ^^ ValueWithIdent
-      )
 
   lazy val valueDecl: Parser[ValueTree] =
-    (numericLit ^^ ValueIdent |
+    (numericLit ^^ StringIdent |
       ("true" | "false") ^^ {
-        case "true" => BooleanLiteral(true)
-        case "false" => BooleanLiteral(false)
+        case "true" => true
+        case "false" => false
       } ^^ BooleanValueIdent |
-      "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident
+      "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident |
+      (identifier <~ ".") ~ ("width" | "height") ^^ ValueWithIdent
       )
 
   lazy val identifier =

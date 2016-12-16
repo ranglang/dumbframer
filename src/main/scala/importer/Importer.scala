@@ -15,12 +15,11 @@ import importer.sc._
 class Importer() {
   import Importer._
   def parse(declarations: List[DeclTree], outputPackage: String): ParseResult = {
-    println("...")
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
     println(rootPackage);
-     Printer.printSymbol(rootPackage, "")
+     Printer.printSymbol(rootPackage)
   }
 
   private def processDecl(owner: ContainerSymbol, declaration: DeclTree) {
@@ -47,16 +46,6 @@ class Importer() {
             }
           }
          }
-
-//        val parentOpt: Option[ParentIdent] =
-//        println("parentOpt: "+parentOpt)
-//        val htmlOpt = params.collectFirst {
-//        }
-//        parentOpt match {
-//          case Some(parentIdent) =>
-//          case None =>
-//            owner.members += container
-//        }
       case AnnotationIdent(file, filePath) =>
       case EventIdent(ident, progress) =>
       case SnapToIdent(source, target) =>

@@ -40,15 +40,11 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
   }
 
   def getLayer(name: Name): LayerSymbol = {
-    println("getLayer"+ name)
-    println(members.toList)
     @tailrec def get(list: ListBuffer[Symbol], ret: ListBuffer[Symbol]) :ListBuffer[Symbol]= {
       if( list.isEmpty)
         ret
       else {
         val current = list.head
-        println("current")
-        println(current)
          current match {
           case LayerSymbol(name,params,members) =>  get(list.drop(1).++(members), ret+=current)
           case PageSymbol(name,params, members) => get(list.drop(1).++(members), ret+=current)
@@ -58,8 +54,6 @@ class ContainerSymbol(nme: Name) extends Symbol(nme) {
     }
 
     val b = get(members, ListBuffer.empty[Symbol]);
-    println("all members");
-    println(b)
       val optMembers = b.collectFirst {
         case sym: LayerSymbol if sym.name == name => sym
       }
@@ -91,10 +85,8 @@ case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends 
 
 case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {
 }
-
 case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }
-
 case class PageSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }
 
