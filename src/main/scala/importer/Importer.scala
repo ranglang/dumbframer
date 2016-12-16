@@ -43,7 +43,6 @@ class Importer() {
               case Some(parentIdent) =>
                   owner.getLayer(Name(parentIdent.value.name)).members += new LayerSymbol(name, params,ListBuffer(), Some(parentIdent.value.name));
               case  None =>
-                println("add number:"+name)
                 owner.members += new LayerSymbol(name, params,ListBuffer(),Option.empty[String]);
             }
           }

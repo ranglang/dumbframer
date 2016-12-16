@@ -51,4 +51,17 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     parserResult.html should be ("<div><div class=\"A\"></div></div>")
     parserResult.css should be (".B.A{"+"\nwidth: 7px;"++"\n}")
   }
+
+  "PrintSymbol" should "respond should have multic symbol" in {
+    val a = PackageSymbol(Name.EMPTY)
+      a.members += LayerSymbol(Name("Farther"),List(WidthIdent(StringIdent("7"))),ListBuffer(
+       LayerSymbol(Name("A"),List(WidthIdent(StringIdent("7"))),ListBuffer(), Some("Farther")),
+      LayerSymbol(Name("B"),List(WidthIdent(StringIdent("7"))),ListBuffer(), Some("Farther"))
+    ), Option.empty[String])
+
+    val parserResult = Printer.printSymbol(a)
+    println(parserResult.css)
+    parserResult.html should be ("<div><div><div class=\"Farther\"><div class=\"A\"><div class=\"B\"></div></div></div></div>")
+    parserResult.css should be (".Farther{\nwidth: 7px;\n}.Farther.A{\nwidth: 7px;\n}.Farther.B{\nwidth: 7px;\n}")
+  }
 }
