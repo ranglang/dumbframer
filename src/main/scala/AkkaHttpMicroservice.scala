@@ -20,7 +20,7 @@ import akka.util.ByteString
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
 import spray.json.DefaultJsonProtocol
-import importer.FramerParser
+import importer.{FramerParser, ParseResult}
 
 import scala.collection.immutable.PagedSeq
 import scala.concurrent.duration.FiniteDuration
@@ -30,6 +30,8 @@ import ch.megard.akka.http.cors.CorsDirectives._
 import ch.megard.akka.http.cors.CorsSettings
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
+
+
 
 case class IpPairSummaryRequest(ip1: String, ip2: String)
 
@@ -60,6 +62,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ipInfoFormat = jsonFormat5(IpInfo.apply)
   implicit val ipPairSummaryRequestFormat = jsonFormat2(IpPairSummaryRequest.apply)
   implicit val ipPairSummaryFormat = jsonFormat3(IpPairSummary.apply)
+  implicit val parserResultFormat = jsonFormat2(ParseResult.apply)
 }
 
 trait Service extends Protocols {
@@ -106,7 +109,6 @@ trait Service extends Protocols {
               val a = new PagedSeqReader(reader);
               Future.successful(FramerParser.parse(a))
             }.runFold("")((a, b) =>{
-              Console.println("...")
               a + b})
           }
         }
@@ -142,7 +144,6 @@ object AkkaHttpMicroservice extends App with Service {
   override implicit val materializer = ActorMaterializer()
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
-
   val settings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true)
   Http().bindAndHandle(cors(settings)(routes), config.getString("http.interface"), config.getInt("http.port"))
 }

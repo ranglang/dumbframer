@@ -14,7 +14,7 @@ import importer.sc._
  */
 class Importer() {
   import Importer._
-  def parse(declarations: List[DeclTree], outputPackage: String): String = {
+  def parse(declarations: List[DeclTree], outputPackage: String): ParseResult = {
     println("...")
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
