@@ -1,5 +1,7 @@
 enablePlugins(JavaAppPackaging)
 
+enablePlugins(com.mpc.scalats.sbt.TypeScriptGeneratorPlugin)
+
 name := "akka-http-microservice"
 organization := "com.theiterators"
 version := "1.0"

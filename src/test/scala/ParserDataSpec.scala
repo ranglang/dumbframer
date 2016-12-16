@@ -29,7 +29,6 @@ class ParserDataSpec extends  FlatSpec with Matchers{
   }
 
   "TermTree" should "respond should be has be x :7px; and some on" in {
-
    val s =  Printer.params2CssString(List(new XIdent(StringIdent("7")), new VisibleIdent(true), new BorderRadiusIdent(StringIdent("7")),
      new BackGroundColorIdent("black"), new BorderWidthIdent(StringIdent("10"))
    ),"")

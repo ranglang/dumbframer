@@ -108,8 +108,7 @@ trait Service extends Protocols {
               val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
               val a = new PagedSeqReader(reader);
               Future.successful(FramerParser.parse(a))
-            }.runFold("")((a, b) =>{
-              a + b})
+            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css))
           }
         }
       } ~
