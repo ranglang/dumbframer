@@ -27,7 +27,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
     "title", "author", "twitter", "description", "Info",
-    "borderWidth","textAlign","center","fontSize","textHeight","color"
+    "borderWidth", "textAlign", "center", "fontSize", "textHeight", "color"
   )
 
   lexical.delimiters ++= List(
@@ -88,7 +88,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     rep(paraType)
 
   lazy val paraType: Parser[TermTree] =
-      "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
+    "backgroundColor" ~> ":" ~> stringLit ^^ BackGroundColorIdent |
       "x" ~> ":" ~> valueDecl ^^ XIdent |
       "y" ~> ":" ~> valueDecl ^^ YIdent |
       "borderRadius" ~> ":" ~> valueDecl ^^ BorderRadiusIdent |
@@ -103,15 +103,15 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
       "parent" ~> ":" ~> identifier ^^ ParentIdent |
       "width" ~> ":" ~> valueDecl ^^ WidthIdent |
-       "height" ~> ":" ~> valueDecl ^^ HeightIdent |
+      "height" ~> ":" ~> valueDecl ^^ HeightIdent |
       ("scrollVertical" ~> ":") ~> valueDecl ^^ ScrollVerticalIdent |
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
-      ("textAlign" ~> ":"~> stringLit) ^^ StyleTextAlignIdent |
-      ("fontSize" ~> ":"~> stringLit) ^^ StyleFontSizeIdent |
-      ("textHeight" ~> ":"~> stringLit) ^^ TextHeightIdent |
-      ("color" ~> ":"~> stringLit) ^^ FontColorIdent
+      ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
+      ("fontSize" ~> ":" ~> stringLit) ^^ StyleFontSizeIdent |
+      ("textHeight" ~> ":" ~> stringLit) ^^ TextHeightIdent |
+      ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
 
 
   lazy val addPageDecl: Parser[DeclTree] =

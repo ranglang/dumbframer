@@ -36,10 +36,10 @@ class Importer() {
               case str: ParentIdent => str
             } match {
               case Some(parentIdent) =>
-                val container = new TextSymbol(name, html.name, params,Some(parentIdent.value.name))
+                val container = new TextSymbol(name, html.value, params,Some(parentIdent.value.name))
                 owner.getLayer(Name(parentIdent.value.name)).members += container
               case None =>
-                val container = new TextSymbol(name, html.name, params,None)
+                val container = new TextSymbol(name, html.value, params,None)
                 owner.members += container
             }
           }
@@ -62,7 +62,8 @@ class Importer() {
       case NotSupportedDecl(msg) =>
         owner.members += new NotSupportSymbol(Name.EMPTY,msg)
       case _ =>
-        owner.members += new CommentSymbol("??? " + declaration)
+        owner.members
+//        owner.members += new CommentSymbol("??? " + declaration)
     }
   }
 }
