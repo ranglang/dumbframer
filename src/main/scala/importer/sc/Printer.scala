@@ -33,15 +33,18 @@ object Printer {
           result +"display: "+"hidden;\n"
         case BorderRadiusIdent(v @ StringIdent(value)) =>
           result +"border-radius: " +value+"px;\n"
+        case StyleTextAlignIdent(v) =>
+          result +"text-align: " +v+";\n"
+        case TextHeightIdent(v) =>
+          result +"text-height: " +v+";\n"
+        case StyleFontSizeIdent(v) =>
+          result +"font-size: " +v+";\n"
         case _ =>
           result;
       })
 
   final def printSymbol(initialSym: Symbol): ParseResult = {
 
-
-    val hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
-    var s: Set[Symbol] = Set()
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
 
       if (current.equals(0)) {
@@ -55,6 +58,9 @@ object Printer {
             val a = hashMap(current).pop()
             a match {
               case layer: PackageSymbol =>
+                println("PackageSymbol ")
+                println(layer.members.length)
+                println(layer.members)
                 layer.members.isEmpty match {
                   case true =>
                     factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<div>" + layer.name.name + "</div></div>", parseResult.css))
@@ -63,7 +69,13 @@ object Printer {
                     val nh = hashMap.+=((current + 1, s))
                     factorialAcc(current + 1, nh, ParseResult(parseResult.html + "<div>" + layer.name.name,parseResult.css))
                 }
+              case layer: TextSymbol =>
+                println("TextSymbol: a ==1")
+                val parent = layer.parentOpt.map(s => "."+s).getOrElse("")
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<a class=\"" + layer.name.name +"\">"+layer.value+"</a></div>",
+                params2CssString(layer.params, parseResult.css+parent+ "."++ layer.name.name +"{"+"\n")+ "}"))
               case layer: LayerSymbol =>
+                println("layer: a ==1")
                 val parent = layer.parentOpt.map(s => "."+s).getOrElse("")
                 layer.members.isEmpty match {
                   case true =>
@@ -86,6 +98,7 @@ object Printer {
               case comment: CommentSymbol =>
                 factorialAcc(current, hashMap, ParseResult(parseResult.html +"<div class=\"" + comment.name.name +"\"></div></div>",parseResult.css))
               case layer: LayerSymbol =>
+                println("layer a>1")
                 val parent = layer.parentOpt.map(s => "."+s).getOrElse("")
                 layer.members.isEmpty match {
                   case true =>
@@ -99,8 +112,6 @@ object Printer {
                 }
 
               case layer: PageSymbol =>
-//                val parent = layer.parentOpt.map(s => "."+s).getOrElse("")
-//                factorialAcc(current, hashMap, ParseResult( parseResult.html + "<div>" + layer.name.name + "</div>" + "</div>",parseResult.css+layer.name.name))
                 factorialAcc(current , hashMap, ParseResult(parseResult.html + "<div class=\"" + layer.name.name +"\">",
                   params2CssString(layer.params, parseResult.css+ "."++ layer.name.name +"{"+"\n")+ "}"))
               case symbol: Symbol =>
@@ -115,6 +126,7 @@ object Printer {
     val initialStack: mutable.Stack[Symbol] = mutable.Stack(initialSym)
     val hm: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
     hm.put(1, initialStack)
+//    println(initialSym);
     factorialAcc(1, hm, ParseResult("<div>",""))
   }
 }

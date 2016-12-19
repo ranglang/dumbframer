@@ -79,7 +79,7 @@ case class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
   }
 }
 
-case class TextSymbol(nme: Name, value: String, params: List[TermTree]) extends Symbol(nme) {
+case class TextSymbol(nme: Name, value: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
 }
 
 case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {

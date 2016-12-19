@@ -30,11 +30,7 @@ import ch.megard.akka.http.cors.CorsDirectives._
 import ch.megard.akka.http.cors.CorsSettings
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
-
-
-
 case class IpPairSummaryRequest(ip1: String, ip2: String)
-
 case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)
 
 object IpPairSummary {

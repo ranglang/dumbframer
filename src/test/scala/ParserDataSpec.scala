@@ -2,7 +2,7 @@ import org.scalatest.FlatSpec
 import akka.stream.scaladsl.Flow
 import importer.Importer
 import importer.Trees._
-import importer.sc.{LayerSymbol, Name, PackageSymbol, Printer}
+import importer.sc._
 import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
@@ -49,6 +49,14 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     val parserResult = Printer.printSymbol(LayerSymbol(Name("A"),List(WidthIdent(StringIdent("7"))),ListBuffer(), Some("B")))
     parserResult.html should be ("<div><div class=\"A\"></div></div>")
     parserResult.css should be (".B.A{"+"\nwidth: 7px;"++"\n}")
+  }
+
+  "TextSymbol" should "respond should not has <a>" in {
+    val parserResult = Printer.printSymbol(TextSymbol(Name("A"),"hello",List(WidthIdent(StringIdent("7")),StyleFontSizeIdent("74px"),
+      TextHeightIdent("23px")), None))
+    parserResult.html should be ("<div><a class=\"A\">hello</a></div>")
+    println(parserResult.css)
+    parserResult.css should be (".A{"+"\nwidth: 7px;\nfont-size: 74px;"+"\ntext-height: 23px;"+"\n}")
   }
 
   "PrintSymbol" should "respond should have multic symbol" in {

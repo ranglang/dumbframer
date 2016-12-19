@@ -20,7 +20,6 @@ class Importer() {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
-    println(rootPackage);
      Printer.printSymbol(rootPackage)
   }
 
@@ -33,8 +32,16 @@ class Importer() {
           case cat: HtmlIdent => cat
         } match {
           case Some(html) => {
-            val container = new TextSymbol(name, html.name, params)
-            owner.members += container
+            params.collectFirst{
+              case str: ParentIdent => str
+            } match {
+              case Some(parentIdent) =>
+                val container = new TextSymbol(name, html.name, params,Some(parentIdent.value.name))
+                owner.getLayer(Name(parentIdent.value.name)).members += container
+              case None =>
+                val container = new TextSymbol(name, html.name, params,None)
+                owner.members += container
+            }
           }
           case None => {
             params.collectFirst{

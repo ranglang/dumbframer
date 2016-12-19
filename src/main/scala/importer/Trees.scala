@@ -44,10 +44,11 @@ object Trees {
     override def name: String = "annotation"
   }
 
-  case class StyleIdent(paraName: String, paraValue: String) extends TermTree with PropertyName {
+  case class StyleIdent(list: List[TermTree]) extends TermTree with PropertyName {
     override def name: String = "style"
   }
 
+  case class EmptyIdent(str: String) extends TermTree
 
   case class SetProgressIdent(paraName: List[Ident], paraValue: String) extends DeclTree with PropertyName {
     override def name: String = "setProgress"
@@ -79,6 +80,12 @@ object Trees {
   case class ParentIdent(value: Ident) extends TermTree with PropertyName {
     override def name: String = "parent"
   }
+
+  case class StyleTextAlignIdent(value: String) extends TermTree
+
+  case class StyleFontSizeIdent(value: String) extends TermTree
+  case class TextHeightIdent(value: String) extends TermTree
+  case class FontColorIdent(value: String) extends TermTree
 
   case class WidthIdent(value: ValueTree) extends TermTree
 

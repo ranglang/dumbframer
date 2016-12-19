@@ -27,7 +27,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
     "title", "author", "twitter", "description", "Info",
-    "borderWidth"
+    "borderWidth","textAlign","center","fontSize","textHeight","color"
   )
 
   lexical.delimiters ++= List(
@@ -74,6 +74,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val setVisibleDecl: Parser[DeclTree] =
     rep1(rep(identifier <~ "."), "visible") ~ ("=" ~> valueDecl) ^^ SetVisibleIdent
 
+
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 
@@ -106,14 +107,15 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       ("scrollVertical" ~> ":") ~> valueDecl ^^ ScrollVerticalIdent |
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
-      "style" ~> ":" ~> styleParaType
+      "style" ~> ":" ^^ EmptyIdent |
+      ("textAlign" ~> ":"~> stringLit) ^^ StyleTextAlignIdent |
+      ("fontSize" ~> ":"~> stringLit) ^^ StyleFontSizeIdent |
+      ("textHeight" ~> ":"~> stringLit) ^^ TextHeightIdent |
+      ("color" ~> ":"~> stringLit) ^^ FontColorIdent
 
-  lazy val styleParaType: Parser[TermTree] =
-    stringLit ~ (":" ~> stringLit) ^^ StyleIdent
 
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
-
 
   lazy val valueDecl: Parser[ValueTree] =
     (numericLit ^^ StringIdent |
