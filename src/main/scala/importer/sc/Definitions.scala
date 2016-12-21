@@ -82,6 +82,9 @@ case class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
 case class TextSymbol(nme: Name, value: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
 }
 
+case class ImageSymbol(nme: Name, value: String,imageUrl: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
+}
+
 case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {
 }
 case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer(), parentOpt: Option[String]) extends Symbol(nme) {

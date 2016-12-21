@@ -16,12 +16,13 @@ import scala.collection.mutable.ListBuffer
  */
 class Importer() {
   import Importer._
-  def parse(declarations: List[DeclTree], outputPackage: String): ParseResult = {
+  def parse(declarations: List[DeclTree], outputPackage: String,projectPath: Option[String]): ParseResult = {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
      Printer.printSymbol(rootPackage)
   }
+
 
   private def processDecl(owner: ContainerSymbol, declaration: DeclTree) {
     declaration match {
@@ -29,31 +30,48 @@ class Importer() {
         owner.members += new PageSymbol(name, params)
       case LayerDecl(IdentName(name), params) =>
         params.collectFirst {
-          case cat: HtmlIdent => cat
+          case cat: ImageIdent => cat
         } match {
-          case Some(html) => {
+          case Some(image) =>{
             params.collectFirst{
               case str: ParentIdent => str
             } match {
               case Some(parentIdent) =>
-                val container = new TextSymbol(name, html.value, params,Some(parentIdent.value.name))
+                val container = new ImageSymbol(name, image.value, image.value, params,Some(parentIdent.value.name))
                 owner.getLayer(Name(parentIdent.value.name)).members += container
               case None =>
-                val container = new TextSymbol(name, html.value, params,None)
+                val container = new ImageSymbol(name, image.value,image.value, params,None)
                 owner.members += container
             }
           }
-          case None => {
-            params.collectFirst{
-              case str: ParentIdent => str
+          case None =>
+            params.collectFirst {
+              case cat: HtmlIdent => cat
             } match {
-              case Some(parentIdent) =>
-                  owner.getLayer(Name(parentIdent.value.name)).members += new LayerSymbol(name, params,ListBuffer(), Some(parentIdent.value.name));
-              case  None =>
-                owner.members += new LayerSymbol(name, params,ListBuffer(),Option.empty[String]);
+              case Some(html) => {
+                params.collectFirst{
+                  case str: ParentIdent => str
+                } match {
+                  case Some(parentIdent) =>
+                    val container = new TextSymbol(name, html.value, params,Some(parentIdent.value.name))
+                    owner.getLayer(Name(parentIdent.value.name)).members += container
+                  case None =>
+                    val container = new TextSymbol(name, html.value, params,None)
+                    owner.members += container
+                }
+              }
+              case None => {
+                params.collectFirst{
+                  case str: ParentIdent => str
+                } match {
+                  case Some(parentIdent) =>
+                    owner.getLayer(Name(parentIdent.value.name)).members += new LayerSymbol(name, params,ListBuffer(), Some(parentIdent.value.name));
+                  case  None =>
+                    owner.members += new LayerSymbol(name, params,ListBuffer(),Option.empty[String]);
+                }
+              }
             }
-          }
-         }
+        }
       case AnnotationIdent(file, filePath) =>
       case EventIdent(ident, progress) =>
       case SnapToIdent(source, target) =>

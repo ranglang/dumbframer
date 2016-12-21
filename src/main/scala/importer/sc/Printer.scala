@@ -68,8 +68,6 @@ object Printer {
             val a = hashMap(current).pop()
             a match {
               case layer: PackageSymbol =>
-                println("layer.members: " + layer.members );
-                println("layer.members: ");
                 println(layer.members);
                 layer.members.isEmpty match {
                   case true =>
@@ -79,6 +77,10 @@ object Printer {
                     val nh = hashMap.+=((current + 1, s))
                     factorialAcc(current + 1, nh, ParseResult(parseResult.html+"<div>" , parseResult.css))// +  + layer.name.name
                 }
+              case layer: ImageSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\">" + "src="+ layer.imageUrl + "/>",
+                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<a class=\"" + layer.name.name + "\">" + layer.value + "</a></div>",

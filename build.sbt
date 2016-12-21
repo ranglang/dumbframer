@@ -24,7 +24,12 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
     "org.scalatest"     %% "scalatest" % scalaTestV , //% "test",
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-    "ch.megard" %% "akka-http-cors" % "0.1.10"
+    "ch.megard" %% "akka-http-cors" % "0.1.10",
+
+//  "com.google.code.gson" % "gson" % "2.3.1",
+//  "com.squareup.okhttp" % "okhttp" % "2.3.0",
+//  "com.squareup.okio" % "okio" % "1.0.0",
+  "com.qiniu"%"qiniu-java-sdk"%"7.2.2"
   )
 }
 

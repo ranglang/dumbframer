@@ -13,6 +13,8 @@ import akka.stream.scaladsl.{Flow, Sink, Source, StreamConverters}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import java.io._
+import java.text.{DateFormat, SimpleDateFormat}
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 import akka.util.ByteString
@@ -28,6 +30,7 @@ import scala.util.parsing.input.PagedSeqReader
 import akka.http.scaladsl.server.directives.ExecutionDirectives._
 import ch.megard.akka.http.cors.CorsDirectives._
 import ch.megard.akka.http.cors.CorsSettings
+import com.qiniu.storage.UploadManager
 import utl.Unzip
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
@@ -68,6 +71,10 @@ trait Service extends Protocols {
   implicit def executor: ExecutionContextExecutor
 
   implicit val materializer: Materializer
+
+//  Auth auth = Auth.create(accessKey, secretKey);
+//  String token = auth.uploadToken(bucketName);
+//  Response r = upManager.put("hello world".getBytes(), "yourkey", token);
 
   def config: Config
 
@@ -119,11 +126,16 @@ trait Service extends Protocols {
               val inputStream = p.entity.dataBytes.runWith(
                 StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
               )
-              val b = new File("/tmp/my-zip")
+              val date = new Date
+              val df = new SimpleDateFormat("MM_dd_yyyy/HH:mm:ss");
+              val b = new File("/tmp/my-zip"+"/"+df.format(date))
               Unzip.unzip(inputStream,b.toPath)
               val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile+"/"+"app.coffee")))
+
+
+              //////////// ///////////////
               val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a))
+              Future.successful(FramerParser.parse(a,Some(b.getAbsolutePath)))
             }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
           }
         }
@@ -137,7 +149,7 @@ trait Service extends Protocols {
               )
               val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
               val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a))
+              Future.successful(FramerParser.parse(a,Option.empty[String]))
             }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
           }
         }
@@ -168,6 +180,7 @@ trait Service extends Protocols {
 }
 
 object AkkaHttpMicroservice extends App with Service {
+
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
