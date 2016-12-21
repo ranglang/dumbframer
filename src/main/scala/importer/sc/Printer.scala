@@ -52,9 +52,7 @@ object Printer {
           result;
       })
 
-
   final def printSymbol(initialSym: Symbol): ParseResult = {
-
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
       if (current.equals(0)) {
         ParseResult(parseResult.html, parseResult.css)

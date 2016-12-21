@@ -12,7 +12,7 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source, StreamConverters}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import java.io.{BufferedReader, IOException, InputStreamReader}
+import java.io._
 import java.util.concurrent.TimeUnit
 
 import akka.util.ByteString
@@ -28,6 +28,7 @@ import scala.util.parsing.input.PagedSeqReader
 import akka.http.scaladsl.server.directives.ExecutionDirectives._
 import ch.megard.akka.http.cors.CorsDirectives._
 import ch.megard.akka.http.cors.CorsSettings
+import utl.Unzip
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 case class IpPairSummaryRequest(ip1: String, ip2: String)
@@ -110,6 +111,23 @@ trait Service extends Protocols {
   val routes = {
 
     logRequestResult("akka-http-microservice") {
+      path("uploadzip") {
+        entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+          complete {
+
+            formdata.parts.mapAsync(1) { p ⇒
+              val inputStream = p.entity.dataBytes.runWith(
+                StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
+              )
+              val b = new File("/tmp/my-zip")
+              Unzip.unzip(inputStream,b.toPath)
+              val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile+"/"+"app.coffee")))
+              val a = new PagedSeqReader(reader);
+              Future.successful(FramerParser.parse(a))
+            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
+          }
+        }
+      } ~
       path("upload") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
