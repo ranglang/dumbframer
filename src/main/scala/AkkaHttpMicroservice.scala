@@ -91,6 +91,22 @@ trait Service extends Protocols {
     }
   }
 
+  def generatorHtml (
+                      parserResult: ParseResult) :ParseResult = {
+    val a:String =
+      "<html>\n" +
+    "<head>\n" +
+    "<style type=\"text/css\" media=\"screen\">\n"+
+    parserResult.css +
+    "</style>"+"\n"+
+    "</head>\n" +
+    "<body>"+"\n" +
+    parserResult.html +
+    "</body>\n" +
+      "</html>"
+    ParseResult(a,parserResult.css)
+  }
+
   val routes = {
 
     logRequestResult("akka-http-microservice") {
@@ -104,7 +120,7 @@ trait Service extends Protocols {
               val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
               val a = new PagedSeqReader(reader);
               Future.successful(FramerParser.parse(a))
-            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css))
+            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
           }
         }
       } ~

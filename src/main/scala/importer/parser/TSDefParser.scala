@@ -110,7 +110,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "style" ~> ":" ^^ EmptyIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
       ("fontSize" ~> ":" ~> stringLit) ^^ StyleFontSizeIdent |
-      ("textHeight" ~> ":" ~> stringLit) ^^ TextHeightIdent |
+      ("textHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
 
 

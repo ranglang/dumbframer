@@ -16,8 +16,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(), Some("package"))
     val parserResult = Printer.printSymbol(packageSymbol)
     println(parserResult.html)
-     parserResult.html shouldBe "<div></div>"
-//    ("<div><div class=\"A\"></div></div>")
+     parserResult.html shouldBe "<div><div class=\"A\"></div></div>"
 //    parserResult.css should be (".A{"+"\n"+"}")
   }
 
@@ -28,17 +27,43 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
     val parserResult = Printer.printSymbol(packageSymbol)
     println(parserResult.html)
-    parserResult.html shouldBe "<div></div>"
-    //    ("<div><div class=\"A\"></div></div>")
-    //    parserResult.css should be (".A{"+"\n"+"}")
+//    <div>
+//      <div class="A">
+//        <div class="B"></div>
+//        <div class="C"></div>
+//      </div>
+//    </div>
+    parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
   }
 
 
-//  "PrintSymbol" should "respond should be has css" in {
-//    val parserResult = Printer.printSymbol(LayerSymbol(Name("A"), List(new XIdent(StringIdent("7"))),ListBuffer(),Option.empty[String]))
-//    parserResult.html should be ("<div><div class=\"A\"></div></div>")
-//    parserResult.css should be (".A{"+"\n"+"x: 7px;"+"\n}")
-//  }
+  "PrintSymbol" should "respond should be single2" in {
+    val packageSymbol = PackageSymbol(Name("package"))
+
+    val thirdA = LayerSymbol(Name("E"),List.empty[TermTree], ListBuffer(), Some("B"))
+
+    val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA), Some("A"))
+    val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
+    packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
+    val parserResult = Printer.printSymbol(packageSymbol)
+    println(parserResult.html)
+    parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
+  }
+
+  "PrintSymbol" should "respond should be single3" in {
+    val packageSymbol = PackageSymbol(Name("package"))
+
+    val thirdA = LayerSymbol(Name("E"),List.empty[TermTree], ListBuffer(), Some("B"))
+    val thirdB = LayerSymbol(Name("F"),List.empty[TermTree], ListBuffer(), Some("B"))
+
+    val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA,thirdB), Some("A"))
+    val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
+    packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
+    val parserResult = Printer.printSymbol(packageSymbol)
+    println(parserResult.html)
+    parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
+  }
+
 //
 //  "TermTree" should "respond should has width and height" in {
 //    val s =  Printer.params2CssString(List(new WidthIdent(StringIdent("7")), new HeightIdent(StringIdent("8"))),"")

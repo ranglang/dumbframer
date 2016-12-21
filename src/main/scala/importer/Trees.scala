@@ -84,7 +84,7 @@ object Trees {
   case class StyleTextAlignIdent(value: String) extends TermTree
 
   case class StyleFontSizeIdent(value: String) extends TermTree
-  case class TextHeightIdent(value: String) extends TermTree
+  case class LineHeightIdent(value: String) extends TermTree
   case class FontColorIdent(value: String) extends TermTree
 
   case class WidthIdent(value: ValueTree) extends TermTree
