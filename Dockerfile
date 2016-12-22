@@ -18,4 +18,4 @@ RUN cat  /home/root/.sbt/repositories
 ADD . /app
 WORKDIR /app
 RUN sbt test
-RUN sbt dorker:publishLocal 
+RUN sbt docker:publishLocal
