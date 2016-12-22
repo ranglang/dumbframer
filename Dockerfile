@@ -18,7 +18,7 @@ RUN cat  /home/root/.sbt/repositories
 ADD . /app
 WORKDIR /app
 RUN sbt test
-RUN sbt docker:publishLocal
+#RUN sbt docker:publishLocal
 RUN sbt package:dist
 RUN unzip target/universal/dumframer-1.0.zip
 ENTRYPOINT ["sh","dumframer-1.0/bin/dumframer"]
