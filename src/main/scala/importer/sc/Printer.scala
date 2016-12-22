@@ -23,9 +23,38 @@ object Printer {
   }
   private implicit val self = this
 
-  final def params2CssString(list: List[TermTree], head: String): String =
+  final def params2CssString(list1: List[TermTree], head: String): String = {
+    val list2:List[TermTree] = list1.collectFirst {
+      case str: WidthIdent => str
+    } match {
+      case Some(widthIdent) =>  list1
+      case None => list1.+:(WidthIdent(StringIdent("100")))
+    }
+
+    val list3 = list2.collectFirst {
+      case str: HeightIdent => str
+    } match {
+      case Some(widthIdent) => list2
+      case None =>  list2.+:(HeightIdent(StringIdent("100")))
+    }
+
+    val list4 = list3.collectFirst {
+      case str: XIdent => str
+    } match {
+      case Some(ident) => list3
+      case None =>  list3.+:(XIdent(StringIdent("100")))
+    }
+
+    val list = list4.collectFirst {
+      case str: YIdent => str
+    } match {
+      case Some(ident) => list4
+      case None =>  list4.+:(YIdent(StringIdent("100")))
+    }
+
     //添加默认值;
-    list.foldLeft(head+"position: absolute;\n")((result, term) =>
+//    position: absolute;
+    list.foldLeft(head + "display: flex;\nposition: relative;\n")((result, term) =>
       term match {
         case HeightIdent(v@StringIdent(s)) =>
           result + "height: " + s + "px;\n"
@@ -41,6 +70,24 @@ object Printer {
           result + "border-width: " + px + "px;\n"
         case BackGroundColorIdent(color) =>
           result + "background-color: " + color + ";\n"
+        case YIdent(v @Value3Ident(pos,optCal,optStr)) =>
+          pos match {
+            case "center" =>{
+              val temp = result + "margin-top: auto;\nmargin-bottom: auto;\n"
+              if(temp.contains("margin"))
+                if (temp.contains("position") ) temp  else temp + "position: relative;"
+              else temp
+            }
+          }
+        case XIdent(v @Value3Ident(pos,optCal,optStr)) =>
+          pos match {
+            case "center" => {
+              val temp = result + "margin-left: auto;\nmargin-right: auto;\n"
+              if(temp.contains("margin"))
+                if (temp.contains("position") ) temp  else temp + "position: relative;"
+              else temp
+            }
+          }
         case YIdent(v@StringIdent(px)) =>
           result + "top: " + px + "px;" + "\n"
         case XIdent(v@StringIdent(px)) =>
@@ -60,6 +107,7 @@ object Printer {
         case _ =>
           result;
       })
+  }
 
   final def printSymbol(initialSym: Symbol, projectPath: Option[String]): ParseResult = {
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
