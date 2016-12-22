@@ -22,4 +22,4 @@ RUN sbt test
 RUN sbt package:dist
 RUN unzip target/universal/dumframer-1.0.zip
 ENTRYPOINT ["sh","dumframer-1.0/bin/dumframer"]
-EXPOST 9000
+EXPOSE 9000
