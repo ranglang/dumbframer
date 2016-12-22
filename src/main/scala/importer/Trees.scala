@@ -139,15 +139,8 @@ object Trees {
   case class WidthDecl(value: String) extends DeclTree
   case class LayerDecl(name: Ident, members: List[TermTree]) extends DeclTree
   case class PageDecl(name: Ident, members: List[TermTree]) extends DeclTree
-
   case class NotSupportedDecl(name: String) extends DeclTree
-
   sealed trait Literal extends TermTree
-//  case class BooleanLiteral(value: Boolean) extends Literal
-//  case class NumberLiteral(value: Double) extends Literal
-//  case class StringLiteral(value: String) extends Literal with PropertyName {
-//    override def name = value
-//  }
 
   sealed abstract class BaseTypeRef extends Tree
 }

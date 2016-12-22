@@ -39,8 +39,9 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "#"
   )
 
-  def parseDefinitions(input: Reader[Char]) =
+  def parseDefinitions(input: Reader[Char]) = {
     phrase(rep(moduleElementDecl1))(new lexical.Scanner(input))
+  }
 
   lazy val EventDecl: Parser[DeclTree] =
     identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> "Click" ~> "," ~> "(" ~> "event" ~> "," ~> "layer" ~> ")" ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent

@@ -19,8 +19,9 @@ object FramerParser {
   def parse(s: PagedSeqReader, projectPath: Option[String]): ParseResult = {
     val parser = new TSDefParser
     parser.parseDefinitions(s) match {
-      case parser.Success(rawCode: List[DeclTree], _) =>
-      new Importer().parse(rawCode, "", projectPath)
+      case parser.Success(rawCode: List[DeclTree], _) => {
+        new Importer().parse(rawCode, "", projectPath)
+      }
       case parser.NoSuccess(msg, next) =>
         ParseResult(
           "Parse error at %s\n".format(next.pos.toString) +
