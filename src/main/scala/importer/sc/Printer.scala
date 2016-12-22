@@ -83,7 +83,7 @@ object Printer {
                 }
               case layer: ImageSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\">" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />",
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
@@ -108,6 +108,10 @@ object Printer {
             println("a>1")
             val layer = hashMap(current).pop()
             layer match {
+              case layer: ImageSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                factorialAcc(current, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />",
+                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
                 factorialAcc(current, hashMap, ParseResult(parseResult.html + "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>",
