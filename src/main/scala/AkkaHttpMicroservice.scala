@@ -114,7 +114,8 @@ trait Service extends Protocols {
     "</head>\n" +
     "<body>"+"\n" +
     parserResult.html +
-    "</body>\n" +
+    "\n" +
+    "\t</body>\n" +
       "</html>"
     ParseResult(a,parserResult.css)
   }
