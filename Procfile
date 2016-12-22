@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/akka-http-microservice -Dhttp.port=$PORT
+web: target/universal/stage/bin/dumframer -Dhttp.port=$PORT

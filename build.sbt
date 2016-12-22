@@ -1,8 +1,9 @@
 enablePlugins(JavaAppPackaging)
 
 enablePlugins(com.mpc.scalats.sbt.TypeScriptGeneratorPlugin)
+enablePlugins(DockerPlugin)
 
-name := "akka-http-microservice"
+name := "dumframer"
 organization := "com.theiterators"
 version := "1.0"
 scalaVersion := "2.11.8"
@@ -45,19 +46,34 @@ Revolver.settings
 //  "-encoding", "utf8"
 //)
 
-resolvers := Seq(
-  Resolver.mavenLocal,
+publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
+
+resolvers ++= Seq(
+//  Resolver.mavenLocal,
+//  Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"),
   "Sonatype " at "http://maven.aliyun.com/nexus/content/groups/public/",
   "typesafe" at  "http://repo.typesafe.com/typesafe/ivy-releases/",
   "jla" at "http://repo.akka.io/snapshots/"
 
 )
 
-fullResolvers := Seq(
-  Resolver.mavenLocal,
-  "Sonatype " at "http://maven.aliyun.com/nexus/content/groups/public/",
-  "typesafe" at  "http://repo.typesafe.com/typesafe/ivy-releases/",
-  "jla" at "http://repo.akka.io/snapshots/"
-)
+//fullResolvers := Seq(
+//  Resolver.mavenLocal,
+////  Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"),
+//  "Sonatype " at "http://maven.aliyun.com/nexus/content/groups/public/",
+//  "typesafe" at  "http://repo.typesafe.com/typesafe/ivy-releases/",
+//  "jla" at "http://repo.akka.io/snapshots/"
+//)
 
 addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17")
+
+packageName in Docker := packageName.value
+
+version in Docker := version.value
+//mappings in Docker := mappings.value
+maintainer := "Rang <lanziwen@outlook.com>"
+dockerExposedPorts in Docker := Seq(9000)
+dockerEntrypoint in Docker := Seq("sh", "bin/dumframer $*")
+dockerRepository := Some("rang")
+dockerBaseImage := "java"
+

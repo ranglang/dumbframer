@@ -116,7 +116,7 @@ trait Service extends Protocols {
     ParseResult(a, parserResult.css)
   }
   val routes = {
-    logRequestResult("akka-http-microservice") {
+    logRequestResult("dumframer") {
       path("uploadzip") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
