@@ -34,7 +34,6 @@ import com.qiniu.common.{QiniuException, Zone}
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
 import utl.Unzip
-
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 case class IpPairSummaryRequest(ip1: String, ip2: String)
 case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)
@@ -74,11 +73,8 @@ trait Service extends Protocols {
 
   implicit val materializer: Materializer
   implicit val uploadManager: UploadManager;
-  implicit   val token: String;
-  implicit   val CdnUrl:String;
-//  Auth auth = Auth.create(accessKey, secretKey);
-//  String token = auth.uploadToken(bucketName);
-//  Response r = upManager.put("hello world".getBytes(), "yourkey", token);
+  implicit val token: String;
+  implicit val CdnUrl: String;
 
   def config: Config
 
@@ -103,83 +99,68 @@ trait Service extends Protocols {
     }
   }
 
-  def generatorHtml (
-                      parserResult: ParseResult) :ParseResult = {
-    val a:String =
+  def generatorHtml(
+                     parserResult: ParseResult): ParseResult = {
+    val a: String =
       "<html>\n" +
-    "<head>\n" +
-    "<style type=\"text/css\" media=\"screen\">\n"+
-    parserResult.css +
-    "</style>"+"\n"+
-    "</head>\n" +
-    "<body>"+"\n" +
-    parserResult.html +
-    "\n" +
-    "\t</body>\n" +
-      "</html>"
-    ParseResult(a,parserResult.css)
+        "<head>\n" +
+        "<style type=\"text/css\" media=\"screen\">\n" +
+        parserResult.css +
+        "</style>" + "\n" +
+        "</head>\n" +
+        "<body>" + "\n" +
+        parserResult.html +
+        "\n" +
+        "\t</body>\n" +
+        "</html>"
+    ParseResult(a, parserResult.css)
   }
-
   val routes = {
-
     logRequestResult("akka-http-microservice") {
       path("uploadzip") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
-
             formdata.parts.mapAsync(1) { p ⇒
               val inputStream = p.entity.dataBytes.runWith(
                 StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
               )
               val date = new Date
               val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
-              val b = new File("/tmp/my-zip"+"/"+df.format(date))
-              Unzip.unzip(inputStream,b.toPath)
-              val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile+"/"+"app.coffee")))
-
-              val f = new File(b.getAbsoluteFile+"/"+"images")
+              val b = new File("/tmp/my-zip" + "/" + df.format(date))
+              Unzip.unzip(inputStream, b.toPath)
+              val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
+              val f = new File(b.getAbsoluteFile + "/" + "images")
               // returns pathnames for files and directory
               val paths = f.listFiles();
-
               // for each pathname in pathname array
-              for( path <- paths)
-              {
-                // prints file and directory paths
-                System.out.println(path);
-//                val key ="lqiong_avatar_" +dateFormat.format(new Date())+".png"
-
-                try{
-                  //                      image.localFileName
-//                  uploadManager.put(image.localFileName,key,token)
-                  uploadManager.put(path.getAbsolutePath,df.format(date)+path.getName,token)
-                }catch  {
-                  case e:QiniuException =>
+              for (path <- paths) {
+                try {
+                  uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
+                } catch {
+                  case e: QiniuException =>
                     e.printStackTrace()
                 }
-
-                println(df.format(date)+path.getName);
               }
-              //////////// ///////////////
               val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a,Some(CdnUrl+df.format(date))))
-            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
+              Future.successful(FramerParser.parse(a, Some(CdnUrl + df.format(date))))
+            }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
       } ~
-      path("upload") {
-        entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
-          complete {
-            formdata.parts.mapAsync(1) { p ⇒
-              val inputStream = p.entity.dataBytes.runWith(
-                StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
-              )
-              val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
-              val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a,Option.empty[String]))
-            }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
+        path("upload") {
+          entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+            complete {
+              formdata.parts.mapAsync(1) { p ⇒
+                val inputStream = p.entity.dataBytes.runWith(
+                  StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
+                )
+                val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
+                val a = new PagedSeqReader(reader);
+                Future.successful(FramerParser.parse(a, Option.empty[String]))
+              }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
+            }
           }
-        }
-      } ~
+        } ~
         pathPrefix("ip") {
           (get & path(Segment)) { ip =>
             complete {
@@ -206,21 +187,21 @@ trait Service extends Protocols {
 }
 
 object AkkaHttpMicroservice extends App with Service {
-  val AccessKey ="31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
+  val AccessKey = "31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
   val SecretKey = "3iW8-rI-FtGUP_di_fjaDOVi_Msj7f1VZE_siL_O"
-  val BucketName ="tingshuo"
+  val BucketName = "tingshuo"
   val auth = Auth.create(AccessKey, SecretKey);
   val z = Zone.zone0();
   val c = new Configuration(z);
   override implicit val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
-  override  implicit val token = auth.uploadToken(BucketName)
+  override implicit val token = auth.uploadToken(BucketName)
   override implicit val uploadManager = new UploadManager(c)
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
-//  uploadManager = new UploadManager()
+  //  uploadManager = new UploadManager()
   val settings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true)
   Http().bindAndHandle(cors(settings)(routes), config.getString("http.interface"), config.getInt("http.port"))
 }

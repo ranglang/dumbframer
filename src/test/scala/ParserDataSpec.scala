@@ -39,43 +39,13 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
     val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
-    println(parserResult.html)
     val a  = "\t<div>\n" +
       "\t\t<div class=\"A\">\n" +
     "\t\t\t<div class=\"B\"></div>\n"+
     "\t\t\t<div class=\"C\"></div>\n"+
     "\t\t</div>\n" +
       "\t</div>\n"
-    println("///////")
-    println(a)
     parserResult.html shouldBe  a
-//      "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
   }
-
-//
-//  "PrintSymbol" should "respond should be single2" in {
-//    val packageSymbol = PackageSymbol(Name("package"))
-//    val thirdA = LayerSymbol(Name("E"),List.empty[TermTree], ListBuffer(), Some("B"))
-//    val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA), Some("A"))
-//    val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
-//    packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
-//    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
-//    println(parserResult.html)
-//    parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
-//  }
-//
-//  "PrintSymbol" should "respond should be single3" in {
-//    val packageSymbol = PackageSymbol(Name("package"))
-//
-//    val thirdA = LayerSymbol(Name("E"),List.empty[TermTree], ListBuffer(), Some("B"))
-//    val thirdB = LayerSymbol(Name("F"),List.empty[TermTree], ListBuffer(), Some("B"))
-//
-//    val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA,thirdB), Some("A"))
-//    val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
-//    packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
-//    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
-//    println(parserResult.html)
-//    parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
-//  }
 
 }

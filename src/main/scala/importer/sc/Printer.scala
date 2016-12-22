@@ -67,17 +67,13 @@ object Printer {
         ParseResult(parseResult.html, parseResult.css)
       }
       else {
-        println("##### "+current)
         hashMap(current).length match {
           case a: Int if a == 0 && current > 1 =>
-            println("a==0")
             factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current-1)+"</div>\n" , parseResult.css))
           case a: Int if a == 1 =>
-            println("a==1")
             val a = hashMap(current).pop()
             a match {
               case layer: PackageSymbol =>
-                println(layer.members);
                 layer.members.isEmpty match {
                   case true =>
                     factorialAcc(current - 1, hashMap, ParseResult(parseResult.html , parseResult.css))//+ "<div>" + layer.name.name + "</div>"
@@ -112,7 +108,6 @@ object Printer {
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
             }
           case a: Int if a > 1 =>
-            println("a>1")
             val layer = hashMap(current).pop()
             layer match {
               case layer: ImageSymbol =>
