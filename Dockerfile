@@ -17,4 +17,5 @@ RUN  echo "[repositories]" > /home/root/.sbt/repositories \
 RUN cat  /home/root/.sbt/repositories
 ADD . /app
 WORKDIR /app
+RUN sbt test
 RUN sbt dorker:publishLocal 
