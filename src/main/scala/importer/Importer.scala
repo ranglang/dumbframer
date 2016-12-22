@@ -20,7 +20,7 @@ class Importer() {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
-     Printer.printSymbol(rootPackage)
+     Printer.printSymbol(rootPackage, projectPath)
   }
 
 

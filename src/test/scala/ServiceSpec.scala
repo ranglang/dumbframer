@@ -1,10 +1,13 @@
 import akka.event.NoLogging
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Flow
+import com.qiniu.common.Zone
+import com.qiniu.storage.{Configuration, UploadManager}
+import com.qiniu.util.Auth
 import org.scalatest._
 
 class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
@@ -12,6 +15,16 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   override def config = testConfig
   override val logger = NoLogging
 
+  val AccessKey ="31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
+  val SecretKey = "3iW8-rI-FtGUP_di_fjaDOVi_Msj7f1VZE_siL_O"
+  val BucketName ="tingshuo"
+  val auth = Auth.create(AccessKey, SecretKey);
+  val z = Zone.zone0();
+  val c = new Configuration(z);
+
+  override implicit val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
+  override  implicit val token = auth.uploadToken(BucketName)
+  override implicit val uploadManager = new UploadManager(c)
   val ip1Info = IpInfo("8.8.8.8", Option("United States"), Option("Mountain View"), Option(37.386), Option(-122.0838))
   val ip2Info = IpInfo("8.8.4.4", Option("United States"), None, Option(38.0), Option(-97.0))
   val ipPairSummary = IpPairSummary(ip1Info, ip2Info)

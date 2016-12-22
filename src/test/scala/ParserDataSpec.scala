@@ -11,10 +11,13 @@ import scala.collection.mutable.ListBuffer
   */
 class ParserDataSpec extends  FlatSpec with Matchers{
 
+  "1" should "11" in {
+    Printer.transformUrl("images/1.png","") shouldBe "1.png"
+  }
   "PrintSymbol" should "respond should be single" in {
     val packageSymbol = PackageSymbol(Name("package"))
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(), Some("package"))
-    val parserResult = Printer.printSymbol(packageSymbol)
+    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
     println(parserResult.html)
      parserResult.html shouldBe "<div><div class=\"A\"></div></div>"
 //    parserResult.css should be (".A{"+"\n"+"}")
@@ -25,7 +28,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(), Some("A"))
     val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
-    val parserResult = Printer.printSymbol(packageSymbol)
+    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
     println(parserResult.html)
 //    <div>
 //      <div class="A">
@@ -45,7 +48,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA), Some("A"))
     val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
-    val parserResult = Printer.printSymbol(packageSymbol)
+    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
     println(parserResult.html)
     parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
   }
@@ -59,7 +62,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(thirdA,thirdB), Some("A"))
     val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
     packageSymbol.members += LayerSymbol(Name("A"),List.empty[TermTree], ListBuffer(b,c), Some("package"))
-    val parserResult = Printer.printSymbol(packageSymbol)
+    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
     println(parserResult.html)
     parserResult.html shouldBe "<div><div class=\"A\"><div class=\"B\"></div><div class=\"C\"></div></div></div>"
   }

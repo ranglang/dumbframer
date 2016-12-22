@@ -12,6 +12,10 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Printer {
+  final def transformUrl (a1: String, a2: String ): String = {
+    val a = a1.indexOf("/")
+    a2 + a1.substring(a +1)
+  }
   private implicit val self = this
 
   final def params2CssString(list: List[TermTree], head: String): String =
@@ -52,7 +56,7 @@ object Printer {
           result;
       })
 
-  final def printSymbol(initialSym: Symbol): ParseResult = {
+  final def printSymbol(initialSym: Symbol, projectPath: Option[String]): ParseResult = {
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
       if (current.equals(0)) {
         ParseResult(parseResult.html, parseResult.css)
@@ -79,7 +83,7 @@ object Printer {
                 }
               case layer: ImageSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\">" + "src="+ layer.imageUrl + "/>",
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + "<img class=\"" + layer.name.name + "\">" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")

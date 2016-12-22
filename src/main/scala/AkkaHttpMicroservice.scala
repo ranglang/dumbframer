@@ -74,7 +74,8 @@ trait Service extends Protocols {
 
   implicit val materializer: Materializer
   implicit val uploadManager: UploadManager;
-  implicit  val token: String;
+  implicit   val token: String;
+  implicit   val CdnUrl:String;
 //  Auth auth = Auth.create(accessKey, secretKey);
 //  String token = auth.uploadToken(bucketName);
 //  Response r = upManager.put("hello world".getBytes(), "yourkey", token);
@@ -159,7 +160,7 @@ trait Service extends Protocols {
               }
               //////////// ///////////////
               val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a,Some(b.getAbsolutePath)))
+              Future.successful(FramerParser.parse(a,Some(CdnUrl+df.format(date))))
             }.runFold(ParseResult("",""))((a,b)=> ParseResult(a.html+b.html,a.css+b.css)).map(generatorHtml)
           }
         }
@@ -207,10 +208,10 @@ object AkkaHttpMicroservice extends App with Service {
   val AccessKey ="31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
   val SecretKey = "3iW8-rI-FtGUP_di_fjaDOVi_Msj7f1VZE_siL_O"
   val BucketName ="tingshuo"
-  val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
   val auth = Auth.create(AccessKey, SecretKey);
   val z = Zone.zone0();
   val c = new Configuration(z);
+  override implicit val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
   override  implicit val token = auth.uploadToken(BucketName)
   override implicit val uploadManager = new UploadManager(c)
   override implicit val system = ActorSystem()
