@@ -7,6 +7,7 @@ package importer.sc
 
 import importer.ParseResult
 import importer.Trees._
+import utl.FramerConfig
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -109,7 +110,7 @@ object Printer {
       })
   }
 
-  final def printSymbol(initialSym: Symbol, projectPath: Option[String]): ParseResult = {
+  final def printSymbol(initialSym: Symbol, projectPath: Option[String], framerConfig: FramerConfig): ParseResult = {
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
       if (current.equals(0)) {
         ParseResult(parseResult.html, parseResult.css)
@@ -124,15 +125,15 @@ object Printer {
               case layer: PackageSymbol =>
                 layer.members.isEmpty match {
                   case true =>
-                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html , parseResult.css))//+ "<div>" + layer.name.name + "</div>"
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html , parseResult.css))
                   case false =>
                     val s = mutable.Stack(layer.members: _*)
                     val nh = hashMap.+=((current + 1, s))
-                    factorialAcc(current + 1, nh, ParseResult(parseResult.html+ printTab(current)+"<div>\n" , parseResult.css))// +  + layer.name.name
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html+ printTab(current)+"<div>\n" , parseResult.css))
                 }
               case layer: ImageSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />\n",
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")

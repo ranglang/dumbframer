@@ -17,6 +17,7 @@ import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+import spray.json._
 import akka.util.ByteString
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -33,10 +34,12 @@ import ch.megard.akka.http.cors.CorsSettings
 import com.qiniu.common.{QiniuException, Zone}
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
-import utl.Unzip
+import org.apache.commons.io.FileUtils
+import utl.{FramerConfig, Unzip}
 
 trait Protocols extends DefaultJsonProtocol {
   implicit val parserResultFormat = jsonFormat2(ParseResult.apply)
+  implicit val parserFramerConfig = jsonFormat2(FramerConfig.apply)
 }
 
 trait Service extends Protocols {
@@ -67,6 +70,34 @@ trait Service extends Protocols {
         "</html>"
     ParseResult(a, parserResult.css)
   }
+
+  def readDeviceType(framerConfigFile:File): Future[FramerConfig] = {
+    val conFig = Future {
+      val lines:String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
+      val config:FramerConfig=  JsonParser(lines).convertTo[FramerConfig]
+      config
+    }
+    conFig.recover{
+      case e:Exception => FramerConfig(deviceType = "apple-iphone-5s-gold", projectId = "")
+    }
+  }
+
+  def uploadImage(f: File, date: Date): Future[Unit] = {
+    val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
+    val paths = f.listFiles();
+    // for each pathname in pathname array
+    Future {
+    for (path <- paths) {
+      try {
+        uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
+      } catch {
+        case e: QiniuException =>
+          e.printStackTrace()
+      }
+    }
+    }
+  }
+
   val routes = {
     logRequestResult("dumframer") {
       path("uploadzip") {
@@ -82,19 +113,13 @@ trait Service extends Protocols {
               Unzip.unzip(inputStream, b.toPath)
               val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
               val f = new File(b.getAbsoluteFile + "/" + "images")
-              // returns pathnames for files and directory
-              val paths = f.listFiles();
-              // for each pathname in pathname array
-              for (path <- paths) {
-                try {
-                  uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
-                } catch {
-                  case e: QiniuException =>
-                    e.printStackTrace()
-                }
+              for {
+                framerConfig <- readDeviceType(f)
+                uploadImage <- uploadImage(f, date)
+              } yield {
+                val a = new PagedSeqReader(reader);
+                FramerParser.parse(a, Some(CdnUrl + df.format(date)),framerConfig)
               }
-              val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a, Some(CdnUrl + df.format(date))))
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
@@ -108,7 +133,7 @@ trait Service extends Protocols {
                 )
                 val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
                 val a = new PagedSeqReader(reader);
-                Future.successful(FramerParser.parse(a, Option.empty[String]))
+                Future.successful(FramerParser.parse(a, Option.empty[String], FramerConfig("apple-iphone-5s-gold","")))
               }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
             }
           }

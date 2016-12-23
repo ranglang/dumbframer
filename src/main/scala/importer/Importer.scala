@@ -7,6 +7,7 @@ package importer
 
 import importer.Trees._
 import importer.sc._
+import utl.FramerConfig
 
 import scala.collection.mutable.ListBuffer
 
@@ -25,11 +26,11 @@ class Importer() {
     rootPackage
   }
 
-  def parse(declarations: List[DeclTree], outputPackage: String, projectPath: Option[String]): ParseResult = {
+  def parse(declarations: List[DeclTree], outputPackage: String, projectPath: Option[String], framerConfig: FramerConfig): ParseResult = {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
-    Printer.printSymbol(rootPackage, projectPath)
+    Printer.printSymbol(rootPackage, projectPath, framerConfig)
   }
 
 

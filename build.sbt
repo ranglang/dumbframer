@@ -30,6 +30,7 @@ libraryDependencies ++= {
 //  "com.google.code.gson" % "gson" % "2.3.1",
 //  "com.squareup.okhttp" % "okhttp" % "2.3.0",
 //  "com.squareup.okio" % "okio" % "1.0.0",
+    "commons-io" % "commons-io" % "2.5",
   "com.qiniu"%"qiniu-java-sdk"%"7.2.2"
   )
 }
@@ -51,6 +52,7 @@ publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.
 resolvers ++= Seq(
 //  Resolver.mavenLocal,
 //  Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"),
+
   "Sonatype " at "http://maven.aliyun.com/nexus/content/groups/public/",
   "typesafe" at  "http://repo.typesafe.com/typesafe/ivy-releases/",
   "jla" at "http://repo.akka.io/snapshots/"

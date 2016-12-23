@@ -131,7 +131,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       ("lineHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
 
-
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
