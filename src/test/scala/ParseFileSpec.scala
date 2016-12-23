@@ -1,15 +1,29 @@
 
-import java.io.File
+import java.io.{File, FileInputStream, InputStreamReader}
 
+import importer.FramerParser
 import org.apache.commons.io.FileUtils
 import org.scalatest._
 import org.scalatest.FlatSpec
 import spray.json.JsonParser
 import utl.FramerConfig
+
+import scala.collection.immutable.PagedSeq
+import scala.util.parsing.input.PagedSeqReader
 /**
   * Created by tian on 23/12/2016.
   */
+
+
 class ParseFileSpec extends  FlatSpec with Matchers with Protocols{
+
+  "FramerCongfig" should "should paser file" in {
+    val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c,FramerConfig("apple-iphone-5s-gold",""))
+      result.css shouldBe "";
+      result.html shouldBe "";
+  }
 
   "FramerCongfig" should "should has iphone 5s gold" in {
     val framerConfigFile = new File( "src/main/resources/config.json")

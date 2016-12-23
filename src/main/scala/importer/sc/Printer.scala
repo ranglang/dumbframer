@@ -24,7 +24,12 @@ object Printer {
   }
   private implicit val self = this
 
-  final def params2CssString(list1: List[TermTree], head: String): String = {
+  final def params2CssString(list1: List[TermTree], head: String)(implicit framer: FramerConfig): String = {
+    val ifResponsive = !framer.selectedHand.isEmpty;
+    val SCREEN_WIDTH = framer.deviceType match {
+      case "apple-iphone-5c-white" => 640
+      case _ => 600
+    }
     val list2:List[TermTree] = list1.collectFirst {
       case str: WidthIdent => str
     } match {
@@ -53,53 +58,52 @@ object Printer {
       case None =>  list4.+:(YIdent(StringIdent("100")))
     }
 
-    //添加默认值;
-//    position: absolute;
     list.foldLeft(head + "display: flex;\nposition: relative;\n")((result, term) =>
       term match {
         case HeightIdent(v@StringIdent(s)) =>
-          result + "height: " + s + "px;\n"
+          if(ifResponsive) result + "height: " + s.toDouble / SCREEN_WIDTH  + "rem;\n"
+          else result + "height: " + s + "px;\n"
         case WidthIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
           result + "width: 100%;\n"
         case HeightIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
           result + "height: 100%;\n"
         case WidthIdent(v@StringIdent(s)) =>
+          if(ifResponsive) result + "width: " + s.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "width: " + s + "px;\n"
         case ScrollVerticalIdent(BooleanValueIdent(b)) =>
           result
         case BorderWidthIdent(value@StringIdent(px)) =>
+          if(ifResponsive) result + "border-width: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "border-width: " + px + "px;\n"
         case BackGroundColorIdent(color) =>
           result + "background-color: " + color + ";\n"
         case YIdent(v @Value3Ident(pos,optCal,optStr)) =>
           pos match {
             case "center" =>{
-              val temp = result + "margin-top: auto;\nmargin-bottom: auto;\n"
-              if(temp.contains("margin"))
-                if (temp.contains("position") ) temp  else temp + "position: relative;"
-              else temp
+               result + "margin-top: auto;\nmargin-bottom: auto;\n"
             }
           }
         case XIdent(v @Value3Ident(pos,optCal,optStr)) =>
           pos match {
             case "center" => {
-              val temp = result + "margin-left: auto;\nmargin-right: auto;\n"
-              if(temp.contains("margin"))
-                if (temp.contains("position") ) temp  else temp + "position: relative;"
-              else temp
+               result + "margin-left: auto;\nmargin-right: auto;\n"
             }
           }
         case YIdent(v@StringIdent(px)) =>
+          if(ifResponsive) result + "top: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "top: " + px + "px;" + "\n"
         case XIdent(v@StringIdent(px)) =>
+          if(ifResponsive) result + "left: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "left: " + px + "px;" + "\n"
         case VisibleIdent(isVisible) if isVisible == false =>
           result + "display: " + "hidden;\n"
         case BorderRadiusIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "border-radius: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "border-radius: " + value + "px;\n"
         case StyleTextAlignIdent(v) =>
           result + "text-align: " + v + ";\n"
         case LineHeightIdent(v) =>
+//          if(ifResponsive) result + "border-radius: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "line-height: " + v + ";\n"
         case StyleFontSizeIdent(v) =>
           result + "font-size: " + v + ";\n"
@@ -110,7 +114,8 @@ object Printer {
       })
   }
 
-  final def printSymbol(initialSym: Symbol, projectPath: Option[String], framerConfig: FramerConfig): ParseResult = {
+  final def printSymbol(initialSym: Symbol, framerConfig: FramerConfig): ParseResult = {
+    implicit val framer:FramerConfig = framerConfig;
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
       if (current.equals(0)) {
         ParseResult(parseResult.html, parseResult.css)
@@ -153,7 +158,19 @@ object Printer {
                     factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                 }
+              case layer: PageSymbol =>
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<div class=\"" + layer.name.name + "\"></div>\n",
+                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                  case false =>
+                                  val s = mutable.Stack(layer.members: _*)
+                                  val nh = hashMap.+=((current + 1, s))
+                                  factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
+                                    params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                }
               case sy: Symbol =>
+                println(sy);
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
             }
           case a: Int if a > 1 =>
@@ -161,7 +178,7 @@ object Printer {
             layer match {
               case layer: ImageSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<img class=\"" + layer.name.name + "\"" + " src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />\n",
+                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<img class=\"" + layer.name.name + "\"" + " src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
@@ -180,8 +197,16 @@ object Printer {
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                 }
               case layer: PageSymbol =>
-                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
-                  params2CssString(layer.params, parseResult.css + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current, hashMap, ParseResult(parseResult.html + printTab(current) + "<div class=\"" + layer.name.name + "\"></div>\n",
+                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html + printTab(current) + "<div class=\"" + layer.name.name + "\">\n",
+                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                }
               case symbol: Symbol =>
                 factorialAcc(current, hashMap, parseResult)
             }

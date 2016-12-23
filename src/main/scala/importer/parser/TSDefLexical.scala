@@ -15,6 +15,7 @@ class TSDefLexical extends Lexical with StdTokens with ImplicitConversions {
   // see `token' in `Scanners'
   def token: Parser[Token] = (
       identifier
+        | jsValueLiteral
     | numericLiteral
     | stringLiteral
     | EofCh ^^^ EOF
@@ -54,8 +55,14 @@ class TSDefLexical extends Lexical with StdTokens with ImplicitConversions {
   def stringLiteral =
     (quoted('\"') | quoted('\'')) ^^ StringLit
 
-  def quoted(quoteChar: Char) =
+  def jsValueLiteral :Parser[NumericLit] =
+    (quoted1('\"') | quoted1('\''))
+
+  def quoted(quoteChar: Char): Parser[String] =
     quoteChar ~> stringOf(inQuoteChar(quoteChar)) <~ quoteChar
+
+  def quoted1(quoteChar: Char):Parser[NumericLit] =
+    quoteChar ~> numericLiteral <~ ('p'~>'x' | 'e'~>'m' | 'r'~> 'e' ~> 'm') <~ quoteChar
 
   def inQuoteChar(quoteChar: Char) =
     chrExcept('\\', quoteChar, EofCh) | pseudoChar

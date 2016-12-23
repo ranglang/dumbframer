@@ -127,9 +127,16 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
-      ("fontSize" ~> ":" ~> stringLit) ^^ StyleFontSizeIdent |
       ("lineHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
-      ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
+      ("color" ~> ":" ~> stringLit) ^^ FontColorIdent |
+      ("fontSize" ~> ":" ~> numericLit ^^ StyleFontSizeIdent)
+
+  def stringOf(p: => Parser[Char]): Parser[String] = rep(p) ^^ chars2string
+  private def chars2string(chars: List[Char]) = chars mkString ""
+
+  lazy val styleValue:Parser[String] = {
+       numericLit <~ "px"
+  }
 
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
@@ -146,6 +153,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val identifier =
     identifierName ^^ Ident
+
 
   lazy val identifierName =
     accept("IdentifierName", {

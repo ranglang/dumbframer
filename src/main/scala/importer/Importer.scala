@@ -26,11 +26,11 @@ class Importer() {
     rootPackage
   }
 
-  def parse(declarations: List[DeclTree], outputPackage: String, projectPath: Option[String], framerConfig: FramerConfig): ParseResult = {
+  def parse(declarations: List[DeclTree], outputPackage: String, framerConfig: FramerConfig): ParseResult = {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
-    Printer.printSymbol(rootPackage, projectPath, framerConfig)
+    Printer.printSymbol(rootPackage, framerConfig)
   }
 
 

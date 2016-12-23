@@ -39,7 +39,7 @@ import utl.{FramerConfig, Unzip}
 
 trait Protocols extends DefaultJsonProtocol {
   implicit val parserResultFormat = jsonFormat2(ParseResult.apply)
-  implicit val parserFramerConfig = jsonFormat2(FramerConfig.apply)
+  implicit val parserFramerConfig = jsonFormat3(FramerConfig.apply)
 }
 
 trait Service extends Protocols {
@@ -54,11 +54,11 @@ trait Service extends Protocols {
 
   val logger: LoggingAdapter
 
-  def generatorHtml(
-                     parserResult: ParseResult): ParseResult = {
+  def generatorHtml(parserResult: ParseResult): ParseResult = {
     val a: String =
       "<html>\n" +
         "<head>\n" +
+        "<script src=\"http://g.tbcdn.cn/mtb/lib-flexible/0.3.2/??flexible_css.js,flexible.js\"></script>"+
         "<style type=\"text/css\" media=\"screen\">\n" +
         parserResult.css +
         "</style>" + "\n" +
@@ -117,8 +117,9 @@ trait Service extends Protocols {
                 framerConfig <- readDeviceType(f)
                 uploadImage <- uploadImage(f, date)
               } yield {
+                val nFramerConfig = framerConfig.copy(projectId = CdnUrl + df.format(date))
                 val a = new PagedSeqReader(reader);
-                FramerParser.parse(a, Some(CdnUrl + df.format(date)),framerConfig)
+                FramerParser.parse(a, nFramerConfig)
               }
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
@@ -133,7 +134,7 @@ trait Service extends Protocols {
                 )
                 val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
                 val a = new PagedSeqReader(reader);
-                Future.successful(FramerParser.parse(a, Option.empty[String], FramerConfig("apple-iphone-5s-gold","")))
+                Future.successful(FramerParser.parse(a, FramerConfig("apple-iphone-5s-gold","")))
               }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
             }
           }
