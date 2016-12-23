@@ -27,7 +27,24 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
     "title", "author", "twitter", "description", "Info",
-    "borderWidth", "textAlign", "center", "fontSize", "textHeight", "color"
+    "borderWidth", "textAlign", "center", "fontSize",
+    "lineHeight", "color",
+    "background","backgroundAttachment",
+    "backgroundColor","backgroundImage","backgroundPosition",
+    "backgroundRepeat", "border","borderBottom","borderBottomColor",
+    "borderBottomStyle","borderBottomWidth","borderColor",
+    "borderLeft","borderLeftColor","borderLeftStyle","borderLeftWidth",
+    "borderRight","borderRightColor","borderRightStyle","borderRightWidth",
+    "borderStyle","borderTop","borderTopColor","borderTopStyle","borderTopWidth",
+    "borderWidth","clear","clip","color","cursor","display","filter","font",
+    "fontFamily","fontSize","fontVariant", "fontWeight",
+    "height", "left", "letterSpacing", "lineHeight", "listStyle", "listStyleImage",
+    "listStylePosition", "listStyleType", "margin", "marginBottom", "marginLeft",
+    "marginRight", "marginTop", "overflow", "padding", "paddingBottom", "paddingLeft",
+    "paddingRight", "paddingTop", "pageBreakAfter", "pageBreakBefore", "position",
+    "cssFloat", "textAlign", "textDecoration", "textDecorationBlink", "textDecorationLineThrough",
+    "textDecorationNone", "textDecorationOverline","textDecorationUnderline",
+    "textIndent", "textTransform", "top","verticalAlign", "visibility","width", "zIndex"
   )
 
   lexical.delimiters ++= List(
@@ -111,7 +128,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "style" ~> ":" ^^ EmptyIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
       ("fontSize" ~> ":" ~> stringLit) ^^ StyleFontSizeIdent |
-      ("textHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
+      ("lineHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
 
 

@@ -9,28 +9,17 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by tian on 16/12/2016.
   */
-class ParserDataSpec extends  FlatSpec with Matchers{
+class ParserDataSpec extends  FlatSpec with Matchers {
 
-  "1" should "printer should has header" in {
+  "TabIndent" should "should has 2 tabs" in {
     Printer.printTab(2) shouldBe "\t\t"
   }
 
-  "1" should "printer should has  three header" in {
-    Printer.printTab(3) shouldBe "\t\t\t"
-  }
-
-  "1" should "11" in {
+  "Printer" should "transformUrl" in {
     Printer.transformUrl("images/1.png","") shouldBe "1.png"
   }
 
-//  "ParseLayerDel" should "has11"  in {
-//    val a = List(PageDecl(Ident("pageScroll"),List()), LayerDecl(Ident("A"),List(ParentIdent(Ident("pageScroll")))))
-//   val c  =  new Importer()
-//     val d = c.parseSome(a)
-//    d shouldBe ""
-//  }
-
-  "PrintSymbol" should "hello" in {
+  "PrintSymbol" should "should recognize class" in {
     val packageSymbol = PackageSymbol(Name("package"))
     packageSymbol.members +=  PageSymbol(Name("pageScroller"),List.empty[TermTree],ListBuffer(
      LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("pageScroller"))
@@ -49,7 +38,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
     parserResult.html shouldBe a
   }
 
-  "PrintSymbol" should "respond should be single1" in {
+  "PrintSymbol" should "respond should be subclass" in {
     val packageSymbol = PackageSymbol(Name("package"))
     val b = LayerSymbol(Name("B"),List.empty[TermTree], ListBuffer(), Some("A"))
     val c = LayerSymbol(Name("C"),List.empty[TermTree], ListBuffer(), Some("A"))
@@ -63,5 +52,4 @@ class ParserDataSpec extends  FlatSpec with Matchers{
       "\t</div>\n"
     parserResult.html shouldBe  a
   }
-
 }
