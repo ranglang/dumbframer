@@ -103,10 +103,11 @@ object Printer {
         case StyleTextAlignIdent(v) =>
           result + "text-align: " + v + ";\n"
         case LineHeightIdent(v) =>
-//          if(ifResponsive) result + "border-radius: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
-          result + "line-height: " + v + ";\n"
+          if(ifResponsive) result + "border-radius: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
+          result + "line-height: " + v + "px;\n"
         case StyleFontSizeIdent(v) =>
-          result + "font-size: " + v + ";\n"
+          if(ifResponsive) result + "font-size: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
+          result + "font-size: " + v + "px;\n"
         case FontColorIdent(v) =>
           result + "color: " + v + ";\n"
         case _ =>

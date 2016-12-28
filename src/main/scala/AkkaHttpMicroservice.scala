@@ -83,7 +83,8 @@ trait Service extends Protocols {
   }
 
   def uploadImage(f: File, date: Date): Future[Unit] = {
-    val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
+    println("uploadImage")
+    val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss")
     val paths = f.listFiles();
     // for each pathname in pathname array
     Future {
@@ -100,27 +101,37 @@ trait Service extends Protocols {
 
   val routes = {
     logRequestResult("dumframer") {
+      path("ip") {
+        get{
+          complete {
+            Future.successful("ip")
+          }
+        }
+      } ~
       path("uploadzip") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
-            formdata.parts.mapAsync(1) { p ⇒
+            formdata.parts.mapAsync(1) { p ⇒ {
               val inputStream = p.entity.dataBytes.runWith(
                 StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
               )
+              println("formdata")
               val date = new Date
               val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
               val b = new File("/tmp/my-zip" + "/" + df.format(date))
               Unzip.unzip(inputStream, b.toPath)
+              println("unzip")
               val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
               val f = new File(b.getAbsoluteFile + "/" + "images")
               for {
                 framerConfig <- readDeviceType(f)
-                uploadImage <- uploadImage(f, date)
+//                uploadImage <- uploadImage(f, date)
               } yield {
                 val nFramerConfig = framerConfig.copy(projectId = CdnUrl + df.format(date))
                 val a = new PagedSeqReader(reader);
                 FramerParser.parse(a, nFramerConfig)
               }
+            }
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
