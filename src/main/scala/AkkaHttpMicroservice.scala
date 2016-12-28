@@ -110,10 +110,12 @@ trait Service extends Protocols {
       } ~
       path("uploadzip") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+          println('uploadzip)
           complete {
+            println('complete)
             formdata.parts.mapAsync(1) { p ⇒ {
               val inputStream = p.entity.dataBytes.runWith(
-                StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
+                StreamConverters.asInputStream(FiniteDuration(100, TimeUnit.SECONDS))
               )
               println("formdata")
               val date = new Date
@@ -155,6 +157,7 @@ trait Service extends Protocols {
 }
 
 object AkkaHttpMicroservice extends App with Service {
+  println("AkkaHttpMicroservice ")
   val AccessKey = "31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
   val SecretKey = "3iW8-rI-FtGUP_di_fjaDOVi_Msj7f1VZE_siL_O"
   val BucketName = "tingshuo"
