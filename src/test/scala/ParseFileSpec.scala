@@ -38,7 +38,7 @@ class ParseFileSpec
         with ImplicitSender
         with WordSpecLike
         with Matchers
-        with BeforeAndAfterAll {
+        with BeforeAndAfterAll with Protocols {
 
   implicit val materializer = ActorMaterializer()
 
@@ -54,8 +54,6 @@ class ParseFileSpec
     b.toList
   }
 
-  //  "Framer unzip" should "should unzip file1" in {
-  //  }
   "FileSink" should {
     "a" in {
       val TestByteStrings = TestLines.map(ByteString(_))
@@ -63,31 +61,36 @@ class ParseFileSpec
        val completion = q.runWith(FileIO.toPath(new File("1.md").toPath))
       val result = Await.result(completion, 3.seconds)
       result.count should equal(6006)
-      //        checkFileContents(f, TestLines.mkString(""))
     }
   }
 
 
-    "Framer unzip" should "should unzip file" in {
-      val file =  new File("src/main/resources/Archive.zip")
-      Unzip.unzip(new FileInputStream("src/main/resources/Archive.zip"),new File("src/a").toPath)
-      1 shouldBe 1
+    "Framer unzip" should {
+      "should unzip file"  in {
+        val file =  new File("src/main/resources/Archive.zip")
+        Unzip.unzip(new FileInputStream("src/main/resources/Archive.zip"),new File("src/a").toPath)
+        1 shouldBe 1
+      }
     }
 
-    "FramerCongfig" should "should paser file" in {
-      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
+    "FramerCongfig" should {
+      "should paser file" in {
+        val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
         val c = new PagedSeqReader(reader);
         val result = FramerParser.parse(c,FramerConfig("apple-iphone-5s-gold",""))
         result.css shouldBe "";
         result.html shouldBe "";
+      }
     }
 
-    "FramerCongfig" should "should has iphone 5s gold" in {
-      val framerConfigFile = new File( "src/main/resources/config.json")
-      val lines:String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
-      val a =  JsonParser(lines)
-      val b = a.convertTo[FramerConfig]
+    "FramerCongfig" should {
+      "should has iphone 5s gold" in {
+        val framerConfigFile = new File( "src/main/resources/config.json")
+        val lines:String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
+        val a =  JsonParser(lines)
+        val b = a.convertTo[FramerConfig]
 
-      b shouldBe FramerConfig(deviceType = "apple-iphone-5s-gold", "5D61D5B4-85D6-4EE7-9C3B-160981C8DAE4")
+        b shouldBe FramerConfig(deviceType = "apple-iphone-5s-gold", "5D61D5B4-85D6-4EE7-9C3B-160981C8DAE4")
+      }
     }
 }

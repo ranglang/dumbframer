@@ -129,6 +129,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
       ("lineHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent |
+      ("borderColor" ~> ":" ~> stringLit) ^^ BorderColorIdent |
       ("fontSize" ~> ":" ~> numericLit ^^ StyleFontSizeIdent)
 
   def stringOf(p: => Parser[Char]): Parser[String] = rep(p) ^^ chars2string

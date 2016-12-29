@@ -88,6 +88,8 @@ object Trees {
   case class LineHeightIdent(value: String) extends TermTree
   case class FontColorIdent(value: String) extends TermTree
 
+  case class BorderColorIdent(value: String) extends TermTree
+
   case class WidthIdent(value: ValueTree) extends TermTree
 
   case class BackGroundColorIdent(value: String) extends TermTree

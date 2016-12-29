@@ -108,6 +108,9 @@ object Printer {
         case StyleFontSizeIdent(v) =>
           if(ifResponsive) result + "font-size: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "font-size: " + v + "px;\n"
+        case BorderColorIdent(v) =>
+          if(ifResponsive) result + "border-color: " + v.toDouble / SCREEN_WIDTH  + ";\n" else
+            result + "border-color: " + v +";\n"
         case FontColorIdent(v) =>
           result + "color: " + v + ";\n"
         case _ =>
