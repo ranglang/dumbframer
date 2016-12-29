@@ -32,6 +32,10 @@ object Trees {
     override def name: String = "point"
   }
 
+  case class CurveIdent(curve: String) extends TermTree with PropertyName {
+    override def name: String = "curve"
+  }
+
   case class SizeIdent(iden: Ident) extends TermTree with PropertyName {
     override def name: String = "size"
   }
@@ -53,6 +57,10 @@ object Trees {
 //  }
   case class StatesIdent(state: Ident ,list: List[TermTree]) extends DeclTree with PropertyName {
     override def name: String = "states"
+  }
+
+  case class AnimationIdent(state: Ident ,list: List[TermTree]) extends DeclTree with PropertyName {
+    override def name: String = "animation"
   }
 
   case class StateIdent(state: Ident ,list: List[TermTree]) extends TermTree with PropertyName {

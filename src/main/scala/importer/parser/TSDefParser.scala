@@ -53,7 +53,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "shadowBlur",
     "borderTopLeftRadius",
     "borderTopRightRadius",
-    "borderStyle","content","stateCycle","states"
+    "borderStyle","content","stateCycle","states","animationOptions","curve"
 
 
 //      shadowSpread: 1
@@ -83,6 +83,12 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val StatesDecl: Parser[DeclTree] =
     identifier ~( ("." ~> "states" ~> "=") ~> rep(StateDecl)) ^^ StatesIdent
 
+  lazy val AnimationsDecl: Parser[DeclTree] =
+    identifier ~( ("." ~> "animationOptions" ~> "=") ~> rep(AnimationDecl)) ^^ AnimationIdent
+
+  lazy val AnimationDecl: Parser[TermTree] =
+    "curve" ~> ":" ~> stringLit ^^ CurveIdent
+
   val StateDecl:  Parser[TermTree] =
       identifier ~ (":" ~> parameterBody) ^^ StateIdent
 
@@ -97,7 +103,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       frameInfoDecl |
       framerImporterDecl |
       setVisibleDecl |
-      StatesDecl
+      StatesDecl|
+      AnimationsDecl
     )
 
   lazy val frameInfoDecl: Parser[DeclTree] =
@@ -175,6 +182,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
 
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
+
+
 
   lazy val valueDecl: Parser[ValueTree] =
     (opt("-")~>numericLit ^^ StringIdent |
