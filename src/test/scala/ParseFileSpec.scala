@@ -56,7 +56,7 @@ class ParseFileSpec
       val c = new PagedSeqReader(reader);
       val result = FramerParser.parse(c,FramerConfig("apple-iphone-5s-gold",""))
       println(result)
-      result.css should (include ("line-height"))
+      result.css should (include ("加btn"))
     }
   }
 

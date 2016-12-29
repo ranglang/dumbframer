@@ -48,6 +48,17 @@ object Trees {
     override def name: String = "style"
   }
 
+//  case class EventIdent(ident: Ident, members: List[DeclTree]) extends DeclTree with PropertyName {
+//    override def name: String = "size"
+//  }
+  case class StatesIdent(state: Ident ,list: List[TermTree]) extends DeclTree with PropertyName {
+    override def name: String = "states"
+  }
+
+  case class StateIdent(state: Ident ,list: List[TermTree]) extends TermTree with PropertyName {
+    override def name: String = "state"
+  }
+
   case class EmptyIdent(str: String) extends TermTree
 
   case class SetProgress1Ident(any:Any) extends DeclTree with PropertyName {

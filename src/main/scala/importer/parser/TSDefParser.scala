@@ -53,7 +53,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "shadowBlur",
     "borderTopLeftRadius",
     "borderTopRightRadius",
-    "borderStyle","content","stateCycle"
+    "borderStyle","content","stateCycle","states"
 
 
 //      shadowSpread: 1
@@ -77,10 +77,14 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     phrase(rep(moduleElementDecl1))(new lexical.Scanner(input))
   }
 
-//   ~>"on" ~> "Events"~>"."~>("Click")~> "," ~> "->" ~>setProgressDecl ^^ SetProgress1Ident
   lazy val EventDecl: Parser[DeclTree] =
     identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> ("Click") ~> "," ~> opt("(" ~> stringLit ~> "," ~> stringLit ~> ")") ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
 
+  lazy val StatesDecl: Parser[DeclTree] =
+    identifier ~( ("." ~> "states" ~> "=") ~> rep(StateDecl)) ^^ StatesIdent
+
+  val StateDecl:  Parser[TermTree] =
+      identifier ~ (":" ~> parameterBody) ^^ StateIdent
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
     framerLayerDecl |
@@ -92,7 +96,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       setParentDecl |
       frameInfoDecl |
       framerImporterDecl |
-      setVisibleDecl
+      setVisibleDecl |
+      StatesDecl
     )
 
   lazy val frameInfoDecl: Parser[DeclTree] =
@@ -172,7 +177,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
   lazy val valueDecl: Parser[ValueTree] =
-    (numericLit ^^ StringIdent |
+    (opt("-")~>numericLit ^^ StringIdent |
       ("true" | "false") ^^ {
         case "true" => true
         case "false" => false
