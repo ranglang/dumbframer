@@ -6,7 +6,6 @@ scroll = new ScrollComponent
     width: 750
     image: "images/部落.jpg"
     parent:scroll.content
-# 	加下滑界面.stateCycle("show", "hide")
 加下滑界面 = new Layer
     parent: scroll
     y: 58
@@ -23,7 +22,7 @@ scroll = new ScrollComponent
     height: 72
     image: "images/加.png"
 加btn.on Events.Click, ->
-    加下滑界面.stateCycle("show","hide")
+    加下滑界面.stateCycle("sdd","dd")
 # 	.visible = ! 加下滑界面.visible
 
 加下滑界面.visible=false

@@ -50,7 +50,15 @@ object Trees {
 
   case class EmptyIdent(str: String) extends TermTree
 
+  case class SetProgress1Ident(any:Any) extends DeclTree with PropertyName {
+    override def name: String = "setProgress"
+  }
+
   case class SetProgressIdent(paraName: List[Ident], paraValue: String) extends DeclTree with PropertyName {
+    override def name: String = "setProgress"
+  }
+
+  case class SetProgress2Ident(paraName: Ident, paraValue: Any) extends DeclTree with PropertyName {
     override def name: String = "setProgress"
   }
 

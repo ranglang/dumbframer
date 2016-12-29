@@ -53,7 +53,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "shadowBlur",
     "borderTopLeftRadius",
     "borderTopRightRadius",
-    "borderStyle","content"
+    "borderStyle","content","stateCycle"
+
 
 //      shadowSpread: 1
 //  shadowColor: "rgba(0,0,0,1)"
@@ -76,8 +77,9 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     phrase(rep(moduleElementDecl1))(new lexical.Scanner(input))
   }
 
+//   ~>"on" ~> "Events"~>"."~>("Click")~> "," ~> "->" ~>setProgressDecl ^^ SetProgress1Ident
   lazy val EventDecl: Parser[DeclTree] =
-    identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> "Click" ~> "," ~> "(" ~> "event" ~> "," ~> "layer" ~> ")" ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
+    identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> ("Click") ~> "," ~> opt("(" ~> stringLit ~> "," ~> stringLit ~> ")") ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
 
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
@@ -100,7 +102,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~> "=" ~> "Framer" ~> "." ~> "Importer" ~> "." ~> "load" ~> "(" ~> stringLit ~> ")" ^^ ImportFileIdent
 
   lazy val setProgressDecl: Parser[DeclTree] =
-    repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
+    repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent |
+      (identifier<~ ".") ~( "stateCycle" ~> "("~>repsep(stringLit,",")~>")") ^^ SetProgress2Ident
 
   lazy val setParentDecl: Parser[DeclTree] =
     repsep(identifier, ".") ~ ("parent" ~> "=" ~> identifier) ^^ SetParentIdent

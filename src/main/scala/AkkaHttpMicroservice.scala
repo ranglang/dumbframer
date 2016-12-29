@@ -88,7 +88,6 @@ trait Service extends Protocols {
   }
 
   def uploadImage(f: File, date: Date): Future[Unit] = {
-    println("uploadImage")
     val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss")
     val paths = f.listFiles();
     // for each pathname in pathname array
