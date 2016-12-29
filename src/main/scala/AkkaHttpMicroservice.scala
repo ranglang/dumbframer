@@ -8,27 +8,29 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Multipart}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ActorMaterializer, Materializer}
-import akka.stream.scaladsl.{Flow, Sink, Source, StreamConverters}
+import akka.stream.{ActorMaterializer, IOResult, Materializer}
+import akka.stream.scaladsl.{FileIO, Flow, Sink, Source, StreamConverters}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import java.io._
 import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipInputStream
 
 import spray.json._
-import akka.util.ByteString
+import akka.util.{ByteString, Timeout}
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.math._
 import spray.json.DefaultJsonProtocol
 import importer.{FramerParser, ParseResult}
 
 import scala.collection.immutable.PagedSeq
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.parsing.input.PagedSeqReader
 import akka.http.scaladsl.server.directives.ExecutionDirectives._
+import akka.http.scaladsl.testkit.RouteTestTimeout
 import ch.megard.akka.http.cors.CorsDirectives._
 import ch.megard.akka.http.cors.CorsSettings
 import com.qiniu.common.{QiniuException, Zone}
@@ -44,7 +46,10 @@ trait Protocols extends DefaultJsonProtocol {
 
 trait Service extends Protocols {
   implicit val system: ActorSystem
+  implicit val timeout = Timeout(10.minute)
+
   implicit def executor: ExecutionContextExecutor
+
   implicit val materializer: Materializer
   implicit val uploadManager: UploadManager;
   implicit val token: String;
@@ -58,7 +63,7 @@ trait Service extends Protocols {
     val a: String =
       "<html>\n" +
         "<head>\n" +
-        "<script src=\"http://g.tbcdn.cn/mtb/lib-flexible/0.3.2/??flexible_css.js,flexible.js\"></script>"+
+        "<script src=\"http://g.tbcdn.cn/mtb/lib-flexible/0.3.2/??flexible_css.js,flexible.js\"></script>" +
         "<style type=\"text/css\" media=\"screen\">\n" +
         parserResult.css +
         "</style>" + "\n" +
@@ -71,14 +76,14 @@ trait Service extends Protocols {
     ParseResult(a, parserResult.css)
   }
 
-  def readDeviceType(framerConfigFile:File): Future[FramerConfig] = {
+  def readDeviceType(framerConfigFile: File): Future[FramerConfig] = {
     val conFig = Future {
-      val lines:String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
-      val config:FramerConfig=  JsonParser(lines).convertTo[FramerConfig]
+      val lines: String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
+      val config: FramerConfig = JsonParser(lines).convertTo[FramerConfig]
       config
     }
-    conFig.recover{
-      case e:Exception => FramerConfig(deviceType = "apple-iphone-5s-gold", projectId = "")
+    conFig.recover {
+      case e: Exception => FramerConfig(deviceType = "apple-iphone-5s-gold", projectId = "")
     }
   }
 
@@ -88,72 +93,75 @@ trait Service extends Protocols {
     val paths = f.listFiles();
     // for each pathname in pathname array
     Future {
-    for (path <- paths) {
-      try {
-        uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
-      } catch {
-        case e: QiniuException =>
-          e.printStackTrace()
+      for (path <- paths) {
+        try {
+          uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
+        } catch {
+          case e: QiniuException =>
+            e.printStackTrace()
+        }
       }
-    }
     }
   }
 
   val routes = {
     logRequestResult("dumframer") {
       path("ip") {
-        get{
+        get {
           complete {
             Future.successful("ip")
           }
         }
       } ~
-      path("uploadzip") {
-        entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
-          println('uploadzip)
-          complete {
-            println('complete)
-            formdata.parts.mapAsync(1) { p ⇒ {
-              val inputStream = p.entity.dataBytes.runWith(
-                StreamConverters.asInputStream(FiniteDuration(100, TimeUnit.SECONDS))
-              )
-              println("formdata")
-              val date = new Date
-              val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
-              val b = new File("/tmp/my-zip" + "/" + df.format(date))
-              Unzip.unzip(inputStream, b.toPath)
-              println("unzip")
-              val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
-              val f = new File(b.getAbsoluteFile + "/" + "images")
-              for {
-                framerConfig <- readDeviceType(f)
-//                uploadImage <- uploadImage(f, date)
-              } yield {
-                val nFramerConfig = framerConfig.copy(projectId = CdnUrl + df.format(date))
-                val a = new PagedSeqReader(reader);
-                FramerParser.parse(a, nFramerConfig)
+        path("uploadzip") {
+          entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+            println('uploadzip)
+            complete {
+              formdata.parts.mapAsync(1) { p ⇒ {
+                p.entity.toStrict(1.minute).flatMap(str => {
+                  val inputStream = str.dataBytes.runWith(
+                    StreamConverters.asInputStream(FiniteDuration(100, TimeUnit.SECONDS))
+                  )
+                  val date = new Date
+                  val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
+                  val b = new File("/tmp/my-zip" + "/" + df.format(date))
+                  Unzip.unzip(inputStream, b.toPath)
+                  val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
+                  val f = new File(b.getAbsoluteFile + "/" + "images")
+                  for {
+                    framerConfig <- readDeviceType(f)
+                    uploadImage <- uploadImage(f, date)
+                  } yield {
+                    val nFramerConfig = framerConfig.copy(projectId = CdnUrl + df.format(date))
+                    val a = new PagedSeqReader(reader);
+                    FramerParser.parse(a, nFramerConfig)
+                  }
+                }
+                )
               }
-            }
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
-      } ~
-        path("upload") {
-          entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
-            complete {
-              formdata.parts.mapAsync(1) { p ⇒
-                val inputStream = p.entity.dataBytes.runWith(
-                  StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
-                )
+    } ~
+      path("upload") {
+        entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+          complete {
+            formdata.parts.mapAsync(1) { p ⇒
+              p.entity.toStrict(5.minute).map(str => {
+                val inputStream = str.dataBytes.runWith(
+                  StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS)))
                 val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
                 val a = new PagedSeqReader(reader);
-                Future.successful(FramerParser.parse(a, FramerConfig("apple-iphone-5s-gold","")))
-              }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
-            }
+                FramerParser.parse(a, FramerConfig("apple-iphone-5s-gold", ""))
+              }
+              )
+            }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
-    }
+      }
   }
+}
+
 }
 
 object AkkaHttpMicroservice extends App with Service {
