@@ -24,6 +24,9 @@ object FramerParser {
         new Importer().parse(rawCode, "", framerConfig)
       }
       case parser.NoSuccess(msg, next) =>
+        println(
+          "Parse error at %s\n".format(next.pos.toString)
+        )
         ParseResult(
           "Parse error at %s\n".format(next.pos.toString) +
             msg + "\n" +

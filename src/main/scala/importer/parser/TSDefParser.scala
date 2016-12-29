@@ -44,7 +44,23 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "paddingRight", "paddingTop", "pageBreakAfter", "pageBreakBefore", "position",
     "cssFloat", "textAlign", "textDecoration", "textDecorationBlink", "textDecorationLineThrough",
     "textDecorationNone", "textDecorationOverline","textDecorationUnderline",
-    "textIndent", "textTransform", "top","verticalAlign", "visibility","width", "zIndex"
+    "textIndent", "textTransform", "top","verticalAlign", "visibility","width", "zIndex",
+    "ScrollComponent", "opacity",
+    "shadowSpread",
+    "shadowColor",
+    "shadowY", "scrollHorizontal",
+    "shadowX",
+    "shadowBlur",
+    "borderTopLeftRadius",
+    "borderTopRightRadius",
+    "borderStyle","content"
+
+//      shadowSpread: 1
+//  shadowColor: "rgba(0,0,0,1)"
+//  shadowY: 2
+//  shadowX: 2
+//  shadowBlur: 6
+
   )
 
   lexical.delimiters ++= List(
@@ -97,7 +113,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 
   lazy val framerPageDecl: Parser[DeclTree] =
-    identifier ~ ("=" ~> "new" ~> "PageComponent" ~> parameterBody) ^^ PageDecl
+    identifier ~ ("=" ~> "new" ~> ("PageComponent"| "ScrollComponent" ) ~> parameterBody) ^^ PageDecl
 
   lazy val snapToDecl: Parser[DeclTree] =
     identifier ~ ("." ~> "snapToPage" ~> "(" ~> identifier <~ ")") ^^ SnapToIdent
@@ -118,15 +134,25 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
         case "false" => false
       } ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
+      "opacity"~>":" ~> valueDecl ^^ OpacityIdent |
+      "shadowSpread"~>":" ~> valueDecl ^^ ShadowSpreadIdent |
+      "shadowColor"~>":" ~> valueDecl ^^ ShadowColorIdent |
+      "shadowY"~>":" ~> valueDecl ^^ ShadowYIdent |
+      "shadowX"~>":" ~> valueDecl ^^ ShadowXIdent |
+      "shadowBlur"~>":" ~> valueDecl ^^ ShadowBlurIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
-      "parent" ~> ":" ~> identifier ^^ ParentIdent |
+      "parent" ~> ":" ~> identifier<~opt("." ~> "content") ^^ ParentIdent |
       "width" ~> ":" ~> valueDecl ^^ WidthIdent |
       "height" ~> ":" ~> valueDecl ^^ HeightIdent |
       ("scrollVertical" ~> ":") ~> valueDecl ^^ ScrollVerticalIdent |
+      ("scrollHorizontal" ~> ":") ~> valueDecl ^^ ScrollHorizontal|
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
       ("lineHeight" ~> ":" ~> numericLit) ^^ LineHeightIdent |
+      ("borderTopLeftRadius" ~> ":" ~> valueDecl) ^^ BorderTopLeftRadiusIdent |
+      ("borderTopRightRadius" ~> ":" ~> valueDecl) ^^ BorderTopRightRadiusIdent |
+      ("borderStyle" ~> ":" ~> valueDecl) ^^ BorderTopRightRadiusIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent |
       ("borderColor" ~> ":" ~> stringLit) ^^ BorderColorIdent |

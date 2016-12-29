@@ -51,6 +51,16 @@ class ParseFileSpec
   }
 
   "FramerCongfig" should {
+    "should test line cookie" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test1.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c,FramerConfig("apple-iphone-5s-gold",""))
+      println(result)
+      result.css should (include ("line-height"))
+    }
+  }
+
+  "FramerCongfig" should {
     "should paser style has lineHeight" in {
       val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/line_height_coffeeScript")))
       val c = new PagedSeqReader(reader);

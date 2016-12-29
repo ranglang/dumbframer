@@ -107,6 +107,20 @@ object Trees {
 
   case class ScrollVerticalIdent(bool: ValueTree) extends TermTree
 
+  case class ScrollHorizontal(bool: ValueTree) extends TermTree
+
+  case class OpacityIdent(value: ValueTree) extends TermTree
+
+  case class BorderTopLeftRadiusIdent(value: ValueTree) extends TermTree
+  case class BorderTopRightRadiusIdent(value: ValueTree) extends TermTree
+  case class BorderStyleIdent (value: ValueTree) extends TermTree
+
+  case class ShadowSpreadIdent(value: ValueTree) extends TermTree
+  case class ShadowColorIdent(value: ValueTree) extends TermTree
+  case class ShadowYIdent(value: ValueTree) extends TermTree
+  case class ShadowXIdent(value: ValueTree) extends TermTree
+  case class ShadowBlurIdent(value: ValueTree) extends TermTree
+
   case class ClipIdent(bool: String) extends ValueTree with PropertyName {
     override def name: String = "scrollVertical"
   }

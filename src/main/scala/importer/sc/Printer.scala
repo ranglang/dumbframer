@@ -34,28 +34,28 @@ object Printer {
       case str: WidthIdent => str
     } match {
       case Some(widthIdent) =>  list1
-      case None => list1.+:(WidthIdent(StringIdent("100")))
+      case None => list1.+:(WidthIdent(StringIdent("0")))
     }
 
     val list3 = list2.collectFirst {
       case str: HeightIdent => str
     } match {
       case Some(widthIdent) => list2
-      case None =>  list2.+:(HeightIdent(StringIdent("100")))
+      case None =>  list2.+:(HeightIdent(StringIdent("0")))
     }
 
     val list4 = list3.collectFirst {
       case str: XIdent => str
     } match {
       case Some(ident) => list3
-      case None =>  list3.+:(XIdent(StringIdent("100")))
+      case None =>  list3.+:(XIdent(StringIdent("0")))
     }
 
     val list = list4.collectFirst {
       case str: YIdent => str
     } match {
       case Some(ident) => list4
-      case None =>  list4.+:(YIdent(StringIdent("100")))
+      case None =>  list4.+:(YIdent(StringIdent("0")))
     }
 
     list.foldLeft(head + "display: flex;\nposition: relative;\n")((result, term) =>
@@ -73,13 +73,14 @@ object Printer {
         case ScrollVerticalIdent(BooleanValueIdent(b)) =>
           result
         case BorderWidthIdent(value@StringIdent(px)) =>
-          if(ifResponsive) result + "border-width: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
+          val r = if(ifResponsive) result + "border-width: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "border-width: " + px + "px;\n"
+          if (r.contains("border-style")) r else r + "border-style: solid;\n"
         case BackGroundColorIdent(color) =>
           result + "background-color: " + color + ";\n"
         case YIdent(v @Value3Ident(pos,optCal,optStr)) =>
           pos match {
-            case "center" =>{
+            case "center" => {
                result + "margin-top: auto;\nmargin-bottom: auto;\n"
             }
           }
@@ -113,6 +114,8 @@ object Printer {
             result + "border-color: " + v +";\n"
         case FontColorIdent(v) =>
           result + "color: " + v + ";\n"
+        case OpacityIdent(v) =>
+          result + "opacity: " + v + ";\n"
         case _ =>
           result;
       })
