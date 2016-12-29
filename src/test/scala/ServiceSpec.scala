@@ -65,7 +65,7 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
       Post(s"/uploadzip", entity) ~> routes ~> check {
         status shouldBe OK
-        responseAs[String] shouldBe "unloadzip"
+        responseAs[String] should (include("html"))
       }
     })
     Await.result(a, 100.seconds)

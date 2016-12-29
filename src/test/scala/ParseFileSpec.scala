@@ -26,13 +26,9 @@ import scala.util.parsing.input.PagedSeqReader
   * Created by tian on 23/12/2016.
   */
 
-
-
-//extends  FlatSpec with Matchers with Protocols{
 class ParseFileSpec
   extends TestKit(ActorSystem(
-    "TestKitUsageSpec" //,
-    //      ConfigFactory.parseString(TestKitUsageSpec.config)
+    "TestKitUsageSpec"
   ))
         with DefaultTimeout
         with ImplicitSender
@@ -78,8 +74,7 @@ class ParseFileSpec
         val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
         val c = new PagedSeqReader(reader);
         val result = FramerParser.parse(c,FramerConfig("apple-iphone-5s-gold",""))
-        result.css shouldBe "";
-        result.html shouldBe "";
+        result.css.contains("display: flex") shouldBe true
       }
     }
 

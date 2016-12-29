@@ -26,8 +26,7 @@ class ParserDataSpec extends  FlatSpec with Matchers {
       LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller")),HeightIdent(StringIdent("74"))), ListBuffer(), Some("pageScroller"))
     ))
     val parserResult = Printer.printSymbol(packageSymbol,FramerConfig("apple-iphone-5s-gold","","iphone-hands-2"))
-    println(parserResult.css)
-    parserResult.html shouldBe "\t<div>\n\t\t<div class=\"pageScroller\"></div>\n"
+    parserResult.html should (include ("pageScroller"))
   }
 
   "PrintSymbol" should "should recognize class" in {
@@ -36,7 +35,7 @@ class ParserDataSpec extends  FlatSpec with Matchers {
      LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("pageScroller"))
     ))
     val parserResult = Printer.printSymbol(packageSymbol,FramerConfig("apple-iphone-5s-gold","",""))
-    parserResult.html shouldBe "\t<div>\n\t\t<div class=\"pageScroller\"></div>\n"
+    parserResult.html should (include ("B"))
   }
 
   "PrintSymbol" should "respond should be single" in {
