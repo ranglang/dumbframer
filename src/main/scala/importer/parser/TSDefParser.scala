@@ -38,7 +38,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "borderStyle","borderTop","borderTopColor","borderTopStyle","borderTopWidth",
     "borderWidth","clear","clip","color","cursor","display","filter","font",
     "fontFamily","fontSize","fontVariant", "fontWeight",
-    "height", "left", "letterSpacing", "lineHeight", "listStyle", "listStyleImage",
+    "height", "left", "letterSpacing", "listStyle", "listStyleImage",
     "listStylePosition", "listStyleType", "margin", "marginBottom", "marginLeft",
     "marginRight", "marginTop", "overflow", "padding", "paddingBottom", "paddingLeft",
     "paddingRight", "paddingTop", "pageBreakAfter", "pageBreakBefore", "position",
@@ -126,8 +126,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
+      ("lineHeight" ~> ":" ~> numericLit) ^^ LineHeightIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
-      ("lineHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
       ("color" ~> ":" ~> stringLit) ^^ FontColorIdent |
       ("borderColor" ~> ":" ~> stringLit) ^^ BorderColorIdent |
       ("fontSize" ~> ":" ~> numericLit ^^ StyleFontSizeIdent)
