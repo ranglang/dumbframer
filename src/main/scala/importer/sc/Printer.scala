@@ -128,6 +128,21 @@ object Printer {
         case StyleFontSizeIdent(v) =>
           if(ifResponsive) result + "font-size: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "font-size: " + v + "px;\n"
+        case PaddingBottomIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "padding-bottom: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "padding-bottom: " + value +"px;\n"
+        case PaddingRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "padding-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "padding-right: " + value +"px;\n"
+        case PaddingTopIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "padding-top: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "padding-top: " + value +"px;\n"
+        case PaddingRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "padding-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "padding-right: " + value +"px;\n"
+        case PaddingLeftIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "padding-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "padding-left: " + value +"px;\n"
         case BorderLeftIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "border-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
             result + "border-left: " + value +"px;\n"
