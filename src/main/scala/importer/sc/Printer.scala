@@ -30,6 +30,8 @@ object Printer {
       case "apple-iphone-5c-white" => 640
       case _ => 600
     }
+
+    // width_ident
     val list2:List[TermTree] = list1.collectFirst {
       case str: WidthIdent => str
     } match {
@@ -58,6 +60,21 @@ object Printer {
       case None =>  list4.+:(YIdent(StringIdent("0")))
     }
 
+    def hasBorderColor = list1.collectFirst {
+      case border: BorderColorIdent => border
+    }.isDefined
+
+    def hasBorderWith = list1.collectFirst {
+      case border: BorderWidthIdent => border
+    }.isDefined
+
+//    match {
+//      case Some(ident) =>
+//      case None =>  list4.+:(YIdent(StringIdent("0")))
+//    }
+
+//    BorderColorIdent
+
     val isRelative:Boolean = list.collectFirst {
       case  XIdent(v @Value3Ident(pos,optCal,optStr)) => v
       case  YIdent(v @Value3Ident(pos,optCal,optStr)) => v
@@ -66,6 +83,22 @@ object Printer {
       case None =>  false
     }
 
+    val paddingLeftWidth:Double = list.collectFirst  {
+      case PaddingLeftIdent(v @StringIdent(value)) => value.toDouble
+    }.getOrElse(0)
+
+    val paddingRightWidth:Double = list.collectFirst  {
+      case PaddingRightIdent(v @StringIdent(value)) => value.toDouble
+    }.getOrElse(0)
+
+    val paddingTopWidth:Double = list.collectFirst  {
+      case PaddingTopIdent(v @StringIdent(value)) => value.toDouble
+    }.getOrElse(0)
+
+    val paddingBottomWidth:Double = list.collectFirst  {
+      case PaddingBottomIdent(v @StringIdent(value)) => value.toDouble
+    }.getOrElse(0)
+
     def getPosition(): String = {
       if(!isRelative) "position: absolute;\n"
       else "position: relative;\n"
@@ -73,14 +106,17 @@ object Printer {
 
    list.foldLeft(head + "display: flex;\n"+ getPosition)((result, term) =>
       term match {
-        case HeightIdent(v@StringIdent(s)) =>
+        case HeightIdent(v@StringIdent(s1)) =>
+          val s = s1.toDouble -paddingTopWidth - paddingBottomWidth
           if(ifResponsive) result + "height: " + s.toDouble / SCREEN_WIDTH  + "rem;\n"
           else result + "height: " + s + "px;\n"
         case WidthIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
           result + "width: 100%;\n"
         case HeightIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
+
           result + "height: 100%;\n"
-        case WidthIdent(v@StringIdent(s)) =>
+        case WidthIdent(v@StringIdent(s1)) =>
+          val s = s1.toDouble -paddingLeftWidth - paddingRightWidth
           if(ifResponsive) result + "width: " + s.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "width: " + s + "px;\n"
         case ScrollVerticalIdent(BooleanValueIdent(b)) =>
@@ -143,12 +179,12 @@ object Printer {
         case PaddingLeftIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "padding-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
             result + "padding-left: " + value +"px;\n"
-        case BorderLeftIdent(v@StringIdent(value)) =>
-          if(ifResponsive) result + "border-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
-            result + "border-left: " + value +"px;\n"
-        case BorderRightIdent(v@StringIdent(value)) =>
-          if(ifResponsive) result + "border-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
-            result + "border-right: " + value +"px;\n"
+//        case BorderLeftIdent(v@StringIdent(value)) =>
+//          if(ifResponsive) result + "border-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+//            result + "border-left: " + value +"px;\n"
+//        case BorderRightIdent(v@StringIdent(value)) =>
+//          if(ifResponsive) result + "border-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+//            result + "border-right: " + value +"px;\n"
         case BorderColorIdent(v) =>
           if(ifResponsive) result + "border-color: " + v.toDouble / SCREEN_WIDTH  + ";\n" else
             result + "border-color: " + v +";\n"
@@ -189,7 +225,7 @@ object Printer {
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: InputSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\"/>\n" +
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\" />\n" +
                   printTab(current-1) +
                   "</div>\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
@@ -235,7 +271,7 @@ object Printer {
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: InputSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+ layer.inputType+"\"placeHolder=\""+layer.value + "\" class=\"" + layer.name.name + "\">\n",
+                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+ layer.inputType+"\" placeHolder=\""+layer.value + "\" class=\"" + layer.name.name + "\" />\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: TextSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")

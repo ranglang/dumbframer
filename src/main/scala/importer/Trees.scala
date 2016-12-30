@@ -140,14 +140,14 @@ object Trees {
 
   case class BorderTopLeftRadiusIdent(value: ValueTree) extends TermTree
 
-  case class BorderLeftIdent(value: ValueTree) extends TermTree
+//  case class BorderLeftIdent(value: ValueTree) extends TermTree
 
   case class PaddingLeftIdent(value: ValueTree) extends TermTree
   case class PaddingRightIdent(value: ValueTree) extends TermTree
   case class PaddingTopIdent(value: ValueTree) extends TermTree
   case class PaddingBottomIdent(value: ValueTree) extends TermTree
 
-  case class BorderRightIdent(value: ValueTree) extends TermTree
+//  case class BorderRightIdent(value: ValueTree) extends TermTree
 
   case class BorderTopRightRadiusIdent(value: ValueTree) extends TermTree
   case class BorderStyleIdent (value: ValueTree) extends TermTree
