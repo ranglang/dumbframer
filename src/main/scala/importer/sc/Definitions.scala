@@ -69,6 +69,9 @@ case class PackageSymbol(nme: Name) extends ContainerSymbol(nme) {
 case class TextSymbol(nme: Name, value: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
 }
 
+case class InputSymbol(nme: Name,inputType: String, value: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
+}
+
 case class ImageSymbol(nme: Name, value: String,imageUrl: String, params: List[TermTree], parentOpt: Option[String]) extends Symbol(nme) {
 }
 

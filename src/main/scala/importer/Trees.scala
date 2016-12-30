@@ -139,6 +139,10 @@ object Trees {
   case class OpacityIdent(value: ValueTree) extends TermTree
 
   case class BorderTopLeftRadiusIdent(value: ValueTree) extends TermTree
+
+  case class BorderLeftIdent(value: ValueTree) extends TermTree
+  case class BorderRightIdent(value: ValueTree) extends TermTree
+
   case class BorderTopRightRadiusIdent(value: ValueTree) extends TermTree
   case class BorderStyleIdent (value: ValueTree) extends TermTree
 
@@ -150,19 +154,23 @@ object Trees {
 
   case class ClipIdent(bool: String) extends ValueTree with PropertyName {
     override def name: String = "scrollVertical"
+
   }
 
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
-  case class StringIdent(name: String) extends ValueTree
+  case class StringIdent(name: String) extends ValueTree {
+  }
 
-  case class BooleanValueIdent(name: Boolean ) extends ValueTree
+  case class BooleanValueIdent(name: Boolean ) extends ValueTree {
+  }
 
   case class Value3Ident(name: String, calculate: Option[String], num: Option[String]) extends ValueTree with PropertyName {
   }
 
-  case class ValueWithIdent(content: Ident, value: String) extends ValueTree
+  case class ValueWithIdent(content: Ident, value: String) extends ValueTree {
+  }
 
   case class Ident(name: String) extends Tree with PropertyName {
     Ident.requireValidIdent(name)

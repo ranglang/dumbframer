@@ -37,10 +37,6 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   override implicit val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
   override implicit val token = auth.uploadToken(BucketName)
   override implicit val uploadManager = new UploadManager(c)
-  //  override implicit val materializer = ActorMaterializer()
-  //  override implicit val executor = system.dispatcher
-//  implicit def default(implicit system: ActorSystem) = RouteTestTimeout(5.second dilated )
-//  implicit val timeout = Timeout(10 seconds)
   import scala.concurrent.duration._
   import akka.actor.ActorSystem
   import akka.testkit._
