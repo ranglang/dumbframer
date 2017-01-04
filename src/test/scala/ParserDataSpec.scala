@@ -33,9 +33,18 @@ class ParserDataSpec extends  FlatSpec with Matchers{
   "PrintSymbol" should "hello" in {
     val packageSymbol = PackageSymbol(Name("package"))
     packageSymbol.members +=  PageSymbol(Name("pageScroller"),List.empty[TermTree],ListBuffer(
-     LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("pageScroller"))
+      LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("pageScroller"))
     ))
-    val parserResult = Printer.printSymbol(packageSymbol,Option.empty[String])
+    val parserResult = Printer.printSymbolVNode(packageSymbol,Option.empty[String])
+    parserResult.html shouldBe "a()"
+  }
+
+  "PrintSymbol" should "vnode" in {
+    val packageSymbol = PackageSymbol(Name("package"))
+    packageSymbol.members += // PageSymbol(Name("pageScroller"),List.empty[TermTree],ListBuffer(
+     LayerSymbol(Name("B"),List(ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("package"))
+//    ))
+    val parserResult = Printer.printSymbolVNode(packageSymbol,Option.empty[String])
     parserResult.html shouldBe "\t<div>\n\t\t<div class=\"pageScroller\"></div>\n"
   }
 

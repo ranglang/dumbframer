@@ -34,6 +34,7 @@ import com.qiniu.common.{QiniuException, Zone}
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
 import utl.Unzip
+
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 case class IpPairSummaryRequest(ip1: String, ip2: String)
 case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)

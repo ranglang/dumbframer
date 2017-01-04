@@ -109,6 +109,96 @@ object Printer {
       })
   }
 
+  final def printSymbolVNode(initialSym: Symbol, projectPath: Option[String]): ParseResult = {
+    @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
+      if (current.equals(0)) {
+        ParseResult(parseResult.html, parseResult.css)
+      }
+      else {
+        hashMap(current).length match {
+          case a: Int if a == 0 && current > 1 =>
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +")\n" , parseResult.css))
+          case a: Int if a == 1 =>
+            val a = hashMap(current).pop()
+            a match {
+              case layer: PackageSymbol =>
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html , parseResult.css))//+ "<div>" + layer.name.name + "</div>"
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html+ ")\n" , parseResult.css))// +  + layer.name.name
+                }
+//              case layer: ImageSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: TextSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>\n" +
+//                  printTab(current-1) +
+//                  "</div>\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+              case layer: LayerSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +"a(\".data\")\n",""
+//                      + "<div class=\"" + layer.name.name + "\"></div>\n"+ printTab(current-1)+ "</div>\n",
+//                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n")
+                    ))
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh,
+                      ParseResult(parseResult.html +printTab(current)+ "div(\".a\"+ [",""))
+//                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                }
+              case sy: Symbol =>
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
+            }
+          case a: Int if a > 1 =>
+            val layer = hashMap(current).pop()
+            layer match {
+//              case layer: ImageSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<img class=\"" + layer.name.name + "\"" + " src=\""+ transformUrl(layer.imageUrl,projectPath.getOrElse("")) + "\" />\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: TextSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+              case layer: LayerSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current, hashMap, ParseResult(parseResult.html +
+                      "div(\".hello\",{},[])",""))
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html +
+                      printTab(current)+ "div(\".a\",[",
+                      ""))
+                }
+//              case layer: PageSymbol =>
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
+//                  params2CssString(layer.params, parseResult.css + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+              case symbol: Symbol =>
+                factorialAcc(current, hashMap, parseResult)
+            }
+          case _ =>
+            parseResult
+        }
+      }
+    }
+
+    val initialStack: mutable.Stack[Symbol] = mutable.Stack(initialSym)
+    val hm: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
+    hm.put(1, initialStack)
+    factorialAcc(1, hm, ParseResult("", "")) //免添加 <div>
+  }
   final def printSymbol(initialSym: Symbol, projectPath: Option[String]): ParseResult = {
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
       if (current.equals(0)) {
