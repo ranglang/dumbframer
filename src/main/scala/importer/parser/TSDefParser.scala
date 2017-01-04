@@ -54,14 +54,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "borderTopLeftRadius",
     "borderTopRightRadius",
     "borderStyle","content","stateCycle","states","animationOptions","curve"
-
-
-//      shadowSpread: 1
-//  shadowColor: "rgba(0,0,0,1)"
-//  shadowY: 2
-//  shadowX: 2
-//  shadowBlur: 6
-
   )
 
   lexical.delimiters ++= List(
@@ -167,6 +159,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       ("lineHeight" ~> ":" ~> numericLit) ^^ LineHeightIdent |
 //      ("borderLeft" ~> ":" ~> valueDecl) ^^ BorderLeftIdent |
 //      ("borderRight" ~> ":" ~> valueDecl) ^^ BorderRightIdent |
+      ("padding" ~> ":" ~> valueDecl) ^^ PaddingIdent |
       ("paddingLeft" ~> ":" ~> valueDecl) ^^ PaddingLeftIdent |
       ("paddingRight" ~> ":" ~> valueDecl) ^^ PaddingRightIdent |
       ("paddingTop" ~> ":" ~> valueDecl) ^^ PaddingTopIdent |

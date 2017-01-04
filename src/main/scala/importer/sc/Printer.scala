@@ -64,16 +64,13 @@ object Printer {
       case border: BorderColorIdent => border
     }.isDefined
 
-    def hasBorderWith = list1.collectFirst {
-      case border: BorderWidthIdent => border
-    }.isDefined
+    val borderWithOpt:Option[Double] = list1.collectFirst {
+      case BorderWidthIdent(v @ StringIdent(value)) => value.toDouble
+    }
 
-//    match {
-//      case Some(ident) =>
-//      case None =>  list4.+:(YIdent(StringIdent("0")))
-//    }
-
-//    BorderColorIdent
+    val paddingOpt = list1.collectFirst {
+      case PaddingIdent(v @StringIdent(value)) => value.toDouble
+    }
 
     val isRelative:Boolean = list.collectFirst {
       case  XIdent(v @Value3Ident(pos,optCal,optStr)) => v
@@ -83,40 +80,94 @@ object Printer {
       case None =>  false
     }
 
+    val isText:Boolean = list.collectFirst {
+      case  HtmlIdent(str) => str
+    }.isDefined
+
     val paddingLeftWidth:Double = list.collectFirst  {
       case PaddingLeftIdent(v @StringIdent(value)) => value.toDouble
-    }.getOrElse(0)
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
 
     val paddingRightWidth:Double = list.collectFirst  {
       case PaddingRightIdent(v @StringIdent(value)) => value.toDouble
-    }.getOrElse(0)
+    } match {
+      case Some(d) => d
+      case None => paddingOpt match {
+        case Some(d) => d
+        case None => 0
+      }
+    }
 
     val paddingTopWidth:Double = list.collectFirst  {
       case PaddingTopIdent(v @StringIdent(value)) => value.toDouble
-    }.getOrElse(0)
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
 
     val paddingBottomWidth:Double = list.collectFirst  {
       case PaddingBottomIdent(v @StringIdent(value)) => value.toDouble
-    }.getOrElse(0)
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
+
+
 
     def getPosition(): String = {
       if(!isRelative) "position: absolute;\n"
       else "position: relative;\n"
     }
 
-   list.foldLeft(head + "display: flex;\n"+ getPosition)((result, term) =>
+    def getDisplay(): String = {
+      if(!isText) "display: flex;\n"
+      else "display: inline-block;\n"
+    }
+
+    def getBorderWidth(): String =
+      list.collectFirst  {
+        case BorderWidthIdent(v @StringIdent(value)) => value.toDouble
+      } match {
+        case Some(padding) => "";
+        case None => "border-width: 0px;\n"
+      }
+
+    def getPaddingWidth(): String =
+      list.collectFirst  {
+        case PaddingIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingLeftIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingTopIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingBottomIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingRightIdent(v @StringIdent(value)) => value.toDouble
+      } match {
+        case Some(padding) => "";
+        case None => "padding: 0px;\n"
+      }
+
+   list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth)((result, term) =>
       term match {
         case HeightIdent(v@StringIdent(s1)) =>
-          val s = s1.toDouble -paddingTopWidth - paddingBottomWidth
+          val s = s1.toDouble -paddingTopWidth - paddingBottomWidth - (2 * borderWithOpt.getOrElse(0.toDouble))
           if(ifResponsive) result + "height: " + s.toDouble / SCREEN_WIDTH  + "rem;\n"
           else result + "height: " + s + "px;\n"
         case WidthIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
           result + "width: 100%;\n"
         case HeightIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
-
           result + "height: 100%;\n"
         case WidthIdent(v@StringIdent(s1)) =>
-          val s = s1.toDouble -paddingLeftWidth - paddingRightWidth
+          val s = s1.toDouble -paddingLeftWidth - paddingRightWidth- (2 * borderWithOpt.getOrElse(0.toDouble))
           if(ifResponsive) result + "width: " + s.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "width: " + s + "px;\n"
         case ScrollVerticalIdent(BooleanValueIdent(b)) =>
@@ -179,12 +230,6 @@ object Printer {
         case PaddingLeftIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "padding-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
             result + "padding-left: " + value +"px;\n"
-//        case BorderLeftIdent(v@StringIdent(value)) =>
-//          if(ifResponsive) result + "border-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
-//            result + "border-left: " + value +"px;\n"
-//        case BorderRightIdent(v@StringIdent(value)) =>
-//          if(ifResponsive) result + "border-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
-//            result + "border-right: " + value +"px;\n"
         case BorderColorIdent(v) =>
           if(ifResponsive) result + "border-color: " + v.toDouble / SCREEN_WIDTH  + ";\n" else
             result + "border-color: " + v +";\n"
