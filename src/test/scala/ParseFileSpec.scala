@@ -50,16 +50,16 @@ class ParseFileSpec
     b.toList
   }
 
-  "FramerCongfig" should {
-    "should test input coffee" in {
-      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testinput.coffee")))
-      val c = new PagedSeqReader(reader);
-      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-      println(result.html)
-      result.html should (include("<input type=\"text\" placeHolder=\"input\""))
-      result.css should (include("border-right"))
-    }
-  }
+//  "FramerCongfig" should {
+//    "should test input coffee" in {
+//      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testinput.coffee")))
+//      val c = new PagedSeqReader(reader);
+//      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+//      println(result.html)
+//      result.html should (include("<input type=\"text\" placeHolder=\"input\""))
+//      result.css should (include("border-right"))
+//    }
+//  }
 
   "FramerCongfig" should {
     "should test line cookie" in {
@@ -106,6 +106,14 @@ class ParseFileSpec
       val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
       val c = new PagedSeqReader(reader);
       val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css.contains("display: flex") shouldBe true
+    }
+
+    "should paser file right" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testRight.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      println(result.css)
       result.css.contains("display: flex") shouldBe true
     }
   }

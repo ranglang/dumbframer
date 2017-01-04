@@ -187,8 +187,14 @@ object Printer {
                 result + "margin-top: auto;\nmargin-bottom: auto;\n"
             }
           }
-        case XIdent(v @Value3Ident(pos,optCal,optStr)) =>
+        case XIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
+            case "right" if (optCal==Some("-")) =>
+              if(ifResponsive) result + "right: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
+                result + "right: " + pxOpt.get.toDouble + "px;" + "\n"
+            case "right" if (optCal==Some("+")) =>
+              if(ifResponsive) result + "right: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
+                result + "right: -" + pxOpt.get.toDouble + "px;" + "\n"
             case "center" => {
               if(result.contains("position"))
                result + "margin-left: auto;\nmargin-right: auto;\n"
@@ -196,12 +202,12 @@ object Printer {
                 result + "margin-left: auto;\nmargin-right: auto;\n"
             }
           }
+        case XIdent(v@StringIdent(px)) =>
+          if(ifResponsive) result + "left: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "left: " + px + "px;" + "\n"
         case YIdent(v@StringIdent(px)) =>
           if(ifResponsive) result + "top: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "top: " + px + "px;" + "\n"
-        case XIdent(v@StringIdent(px)) =>
-          if(ifResponsive) result + "left: " + px.toDouble / SCREEN_WIDTH  + "rem;\n" else
-          result + "left: " + px + "px;" + "\n"
         case VisibleIdent(isVisible) if isVisible == false =>
           result + "display: " + "hidden;\n"
         case BorderRadiusIdent(v@StringIdent(value)) =>
