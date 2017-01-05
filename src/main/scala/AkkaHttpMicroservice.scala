@@ -21,7 +21,7 @@ import akka.util.ByteString
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
-import spray.json.DefaultJsonProtocol
+import spray.json.{DefaultJsonProtocol, JsonParser}
 import importer.{FramerParser, ParseResult}
 
 import scala.collection.immutable.PagedSeq
@@ -33,6 +33,7 @@ import ch.megard.akka.http.cors.CorsSettings
 import com.qiniu.common.{QiniuException, Zone}
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
+import org.apache.commons.io.FileUtils
 import utl.{FramerConfig, Unzip}
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
@@ -61,6 +62,7 @@ object IpPairSummary {
 }
 
 trait Protocols extends DefaultJsonProtocol {
+  implicit val framerConfigFormat = jsonFormat3(FramerConfig.apply)
   implicit val ipInfoFormat = jsonFormat5(IpInfo.apply)
   implicit val ipPairSummaryRequestFormat = jsonFormat2(IpPairSummaryRequest.apply)
   implicit val ipPairSummaryFormat = jsonFormat3(IpPairSummary.apply)
@@ -131,6 +133,10 @@ trait Service extends Protocols {
               Unzip.unzip(inputStream, b.toPath)
               val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
               val f = new File(b.getAbsoluteFile + "/" + "images")
+
+              val framerConfigFile = new File(b.getAbsoluteFile + "/" + "framer"+"/"+"config.json")
+              val lines: String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
+              val config = JsonParser(lines).convertTo[FramerConfig]
               // returns pathnames for files and directory
               val paths = f.listFiles();
               // for each pathname in pathname array
@@ -144,8 +150,8 @@ trait Service extends Protocols {
               }
               val a = new PagedSeqReader(reader);
               Future.successful(FramerParser.parse(a,
-                FramerConfig("apple-iphone-5s-gold", CdnUrl + df.format(date))
-              ))
+                config))
+//                FramerConfig("apple-iphone-5s-gold", CdnUrl + df.format(date))
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
