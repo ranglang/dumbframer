@@ -24,6 +24,245 @@ object Printer {
   }
   private implicit val self = this
 
+  final def params2CssStringVnode(list1: List[TermTree], head1: String)(implicit framer: FramerConfig): String = {
+    val head = "style: {" ;
+    val ifResponsive = !framer.selectedHand.isEmpty;
+    val SCREEN_WIDTH = framer.deviceType match {
+      case "apple-iphone-5c-white" => 640
+      case _ => 600
+    }
+
+    // width_ident
+    val list2:List[TermTree] = list1.collectFirst {
+      case str: WidthIdent => str
+    } match {
+      case Some(widthIdent) =>  list1
+      case None => list1.+:(WidthIdent(StringIdent("0")))
+    }
+
+    val list3 = list2.collectFirst {
+      case str: HeightIdent => str
+    } match {
+      case Some(widthIdent) => list2
+      case None =>  list2.+:(HeightIdent(StringIdent("0")))
+    }
+
+    val list4 = list3.collectFirst {
+      case str: XIdent => str
+    } match {
+      case Some(ident) => list3
+      case None =>  list3.+:(XIdent(StringIdent("0")))
+    }
+
+    val list = list4.collectFirst {
+      case str: YIdent => str
+    } match {
+      case Some(ident) => list4
+      case None =>  list4.+:(YIdent(StringIdent("0")))
+    }
+
+    def hasBorderColor = list1.collectFirst {
+      case border: BorderColorIdent => border
+    }.isDefined
+
+    val borderWithOpt:Option[Double] = list1.collectFirst {
+      case BorderWidthIdent(v @ StringIdent(value)) => value.toDouble
+    }
+
+    val paddingOpt = list1.collectFirst {
+      case PaddingIdent(v @StringIdent(value)) => value.toDouble
+    }
+
+    val isRelative:Boolean =
+      list.collectFirst {
+        case  XIdent(v @Value3Ident(pos,optCal,optStr)) if optCal == Some("pos") => v
+        case  YIdent(v @Value3Ident(pos,optCal,optStr))if optCal == Some("pos") => v
+      } match {
+        case Some(ident) => true
+        case None =>  false
+      }
+
+    val isText:Boolean = list.collectFirst {
+      case  HtmlIdent(str) => str
+    }.isDefined
+
+    val paddingLeftWidth:Double = list.collectFirst  {
+      case PaddingLeftIdent(v @StringIdent(value)) => value.toDouble
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
+
+    val paddingRightWidth:Double = list.collectFirst  {
+      case PaddingRightIdent(v @StringIdent(value)) => value.toDouble
+    } match {
+      case Some(d) => d
+      case None => paddingOpt match {
+        case Some(d) => d
+        case None => 0
+      }
+    }
+
+    val paddingTopWidth:Double = list.collectFirst  {
+      case PaddingTopIdent(v @StringIdent(value)) => value.toDouble
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
+
+    val paddingBottomWidth:Double = list.collectFirst  {
+      case PaddingBottomIdent(v @StringIdent(value)) => value.toDouble
+    } match {
+      case Some(padding) => padding
+      case None => paddingOpt  match {
+        case Some(padding) => padding
+        case None => 0
+      }
+    }
+
+
+
+    def getPosition(): String = {
+      if(!isRelative) "position: \"absolute\","
+      else "position: \"relative,\" "
+    }
+
+    def getDisplay(): String = {
+      if(!isText) "display: \"flex\", "
+      else "display: \"inline-block\", "
+    }
+
+    def getBorderWidth(): String =
+      list.collectFirst  {
+        case BorderWidthIdent(v @StringIdent(value)) => value.toDouble
+      } match {
+        case Some(padding) => "";
+        case None => "borderWidth: \"0px\", "
+      }
+
+    def getPaddingWidth(): String =
+      list.collectFirst  {
+        case PaddingIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingLeftIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingTopIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingBottomIdent(v @StringIdent(value)) => value.toDouble
+        case PaddingRightIdent(v @StringIdent(value)) => value.toDouble
+      } match {
+        case Some(padding) => "";
+        case None => "padding: \"0px\", "
+      }
+
+    list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth)((result, term) =>
+      term match {
+        case HeightIdent(v@StringIdent(s1)) =>
+          val s = s1.toDouble -paddingTopWidth - paddingBottomWidth - (2 * borderWithOpt.getOrElse(0.toDouble))
+          if(ifResponsive) result + "height: " + s.toDouble / SCREEN_WIDTH  + "rem\","
+          else result + "height: \"" + s + "px\", "
+        case WidthIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
+          result + "width: \"100%\","
+        case HeightIdent(v@ValueWithIdent(Ident("Screen"), value)) =>
+          result + "height: \"100%\", "
+        case WidthIdent(v@StringIdent(s1)) =>
+          val s = s1.toDouble -paddingLeftWidth - paddingRightWidth- (2 * borderWithOpt.getOrElse(0.toDouble))
+          if(ifResponsive) result + "width: \"" + s.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "width: \"" + s + "px\", "
+        case ScrollVerticalIdent(BooleanValueIdent(b)) =>
+          result
+        case BorderWidthIdent(value@StringIdent(px)) =>
+          val r = if(ifResponsive) result + "borderWidth: \"" + px.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "borderWidth: \"" + px + "px\", "
+          if (r.contains("borderStyle")) r else r + "borderStyle: \"solid\", "
+        case BackGroundColorIdent(color) =>
+          result + "backgroundColor: \"" + color + "\","
+
+        case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
+          pos match {
+            case "bottom" if (optCal==Some("-")) =>
+              println(v.toString);
+              print(pxOpt.get)
+              println(v.toString);
+              println(v.toString);
+              if(ifResponsive) result + "bottom: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
+                result + "bottom: \"" + pxOpt.get.toDouble + "px\"," + " "
+            case "top" if (optCal==Some("-")) =>
+              println(v.toString);
+              print(pxOpt.get)
+              println(v.toString);
+              if(ifResponsive) result + "top: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
+                result + "top: \"" + pxOpt.get.toDouble + "px\"," + " "
+            case "center" => {
+              if(result.contains("position"))
+                result + "marginTop: \"auto\",marginBottom: \"auto\","
+              else
+                result + "marginTop: \"auto\"\nmarginBottom: auto;\n"
+            }
+          }
+        case XIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
+          pos match {
+            case "right" if (optCal==Some("-")) =>
+              if(ifResponsive) result + "right: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
+                result + "right: " + pxOpt.get.toDouble + "px;" + " "
+            case "right" if (optCal==Some("+")) =>
+              if(ifResponsive) result + "right: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
+                result + "right: \"" + pxOpt.get.toDouble + "px\"," + " "
+            case "center" => {
+              if(result.contains("position"))
+                result + "marginLeft: \"auto\", marginRight: \"auto\", "
+              else
+                result + "marginLeft: \"auto\", marginRight: \"auto\", "
+            }
+          }
+        case XIdent(v@StringIdent(px)) =>
+          if(ifResponsive) result + "left: \"" + px.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "left: \"" + px + "px\"," + " "
+        case YIdent(v@StringIdent(px)) =>
+          if(ifResponsive) result + "top: \"" + px.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "top: \"" + px + "px\"," + ""
+        case VisibleIdent(isVisible) if isVisible == false =>
+          result + "display: \"" + "hidden\" "
+        case BorderRadiusIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "borderRadius: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "borderRadius: \"" + value + "px\", "
+        case StyleTextAlignIdent(v) =>
+          result + "textAlign: \"" + v + "\", "
+        case LineHeightIdent(v) =>
+          if(ifResponsive) result + "lineHeight: \"" + v.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "lineHeight: \"" + v + "px\", "
+        case StyleFontSizeIdent(v) =>
+          if(ifResponsive) result + "fontSize: \"" + v.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "fontSize: " + v + "px\", "
+        case PaddingBottomIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "paddingBottom: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "paddingBottom: \"" + value +"px\", "
+        case PaddingRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "paddingRight: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "padding-right: \"" + value +"px\", "
+        case PaddingTopIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "paddingTop: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "paddingTop: \"" + value +"px\", "
+        case PaddingRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "paddingRight: " + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "paddingRight: \"" + value +"px\", "
+        case PaddingLeftIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "paddingLeft: \"" + value.toDouble / SCREEN_WIDTH  + "rem;\"," else
+            result + "paddingLeft: \"" + value +"px\", "
+        case BorderColorIdent(v) =>
+          if(ifResponsive) result + "borderColor: \"" + v.toDouble / SCREEN_WIDTH  + "\"," else
+            result + "borderColor: \"" + v +"\", "
+        case FontColorIdent(v) =>
+          result + "color: \"" + v + "\","
+        case OpacityIdent(v) =>
+          result + "opacity: \"" + v + "\", "
+        case _ =>
+          result;
+      }) +"}"
+  }
   final def params2CssString(list1: List[TermTree], head: String)(implicit framer: FramerConfig): String = {
     val ifResponsive = !framer.selectedHand.isEmpty;
     val SCREEN_WIDTH = framer.deviceType match {
@@ -231,7 +470,7 @@ object Printer {
         case StyleTextAlignIdent(v) =>
           result + "text-align: " + v + ";\n"
         case LineHeightIdent(v) =>
-          if(ifResponsive) result + "border-radius: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
+          if(ifResponsive) result + "line-height: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "line-height: " + v + "px;\n"
         case StyleFontSizeIdent(v) =>
           if(ifResponsive) result + "font-size: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
@@ -308,7 +547,7 @@ object Printer {
                 layer.members.isEmpty match {
                   case true =>
                     factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +
-                      printTab(current) +"div(\"."+layer.name.name+"\",{},[])\n",
+                      printTab(current) +"div(\"."+layer.name.name+"\",{"+params2CssStringVnode(layer.params,"")+"},[])\n",
 //                       "<div class=\"" + layer.name.name + "\"></div>\n"+ printTab(current-1)+ "</div>\n",
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                   case false =>
