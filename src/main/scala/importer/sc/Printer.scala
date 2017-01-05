@@ -263,6 +263,127 @@ object Printer {
       })
   }
 
+  final def printSymbolVNode(initialSym: Symbol, framerConfig: FramerConfig): ParseResult = {
+    implicit val framer:FramerConfig = framerConfig;
+    @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {
+      if (current.equals(0)) {
+        ParseResult(parseResult.html, parseResult.css)
+      }
+      else {
+        println(".."+ hashMap(current).length)
+        hashMap(current).length match {
+          case a: Int if a == 0 && current > 0 =>
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+"])" , parseResult.css))
+          case a: Int if a == 1 =>
+            val a = hashMap(current).pop()
+            a match {
+              case layer: PackageSymbol =>
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html , parseResult.css))
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html+
+                      printTab(current)+"div(\"\",{},["+"\n" , parseResult.css))
+                }
+//              case layer: ImageSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: InputSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\" />\n" +
+//                  printTab(current-1) +
+//                  "</div>\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: TextSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>\n" +
+//                  printTab(current-1) +
+//                  "</div>\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+              case layer: LayerSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                layer.members.isEmpty match {
+                  case true =>
+                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +
+                      printTab(current) +"div(\"."+layer.name.name+"\",{},[])\n",
+//                       "<div class=\"" + layer.name.name + "\"></div>\n"+ printTab(current-1)+ "</div>\n",
+                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                  case false =>
+                    val s = mutable.Stack(layer.members: _*)
+                    val nh = hashMap.+=((current + 1, s))
+                    factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
+                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+                }
+//              case layer: PageSymbol =>
+//                layer.members.isEmpty match {
+//                  case true =>
+//                    factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<div class=\"" + layer.name.name + "\"></div>\n",
+//                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                  case false =>
+//                    val s = mutable.Stack(layer.members: _*)
+//                    val nh = hashMap.+=((current + 1, s))
+//                    factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
+//                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                }
+              case sy: Symbol =>
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
+            }
+          case a: Int if a > 1 =>
+            val layer = hashMap(current).pop()
+            layer match {
+//              case layer: ImageSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<img class=\"" + layer.name.name + "\"" + " src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: InputSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+ layer.inputType+"\" placeHolder=\""+layer.value + "\" class=\"" + layer.name.name + "\" />\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: TextSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>\n",
+//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+//              case layer: LayerSymbol =>
+//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+//                layer.members.isEmpty match {
+//                  case true =>
+//                    factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\"></div>\n",
+//                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                  case false =>
+//                    val s = mutable.Stack(layer.members: _*)
+//                    val nh = hashMap.+=((current + 1, s))
+//                    factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + layer.name.name + "\">\n",
+//                      params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                }
+//              case layer: PageSymbol =>
+//                layer.members.isEmpty match {
+//                  case true =>
+//                    factorialAcc(current, hashMap, ParseResult(parseResult.html + printTab(current) + "<div class=\"" + layer.name.name + "\"></div>\n",
+//                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                  case false =>
+//                    val s = mutable.Stack(layer.members: _*)
+//                    val nh = hashMap.+=((current + 1, s))
+//                    factorialAcc(current + 1, nh, ParseResult(parseResult.html + printTab(current) + "<div class=\"" + layer.name.name + "\">\n",
+//                      params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
+//                }
+              case symbol: Symbol =>
+                factorialAcc(current, hashMap, parseResult)
+            }
+          case _ =>
+            parseResult
+        }
+      }
+    }
+
+    val initialStack: mutable.Stack[Symbol] = mutable.Stack(initialSym)
+    val hm: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
+    hm.put(1, initialStack)
+    factorialAcc(1, hm, ParseResult("", "")) //免添加 <div>
+  }
+
   final def printSymbol(initialSym: Symbol, framerConfig: FramerConfig): ParseResult = {
     implicit val framer:FramerConfig = framerConfig;
     @tailrec def factorialAcc(current: Int, hashMap: mutable.HashMap[Int, mutable.Stack[Symbol]], parseResult: ParseResult): ParseResult = {

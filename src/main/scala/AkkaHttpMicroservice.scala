@@ -16,6 +16,7 @@ import java.io._
 import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
 
 import akka.util.ByteString
 
@@ -123,34 +124,37 @@ trait Service extends Protocols {
       path("uploadzip") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {
-            formdata.parts.mapAsync(1) { p ⇒
-              val inputStream = p.entity.dataBytes.runWith(
-                StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
-              )
-              val date = new Date
-              val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
-              val b = new File("/tmp/my-zip" + "/" + df.format(date))
-              Unzip.unzip(inputStream, b.toPath)
-              val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
-              val f = new File(b.getAbsoluteFile + "/" + "images")
+            formdata.parts.mapAsync(1) { p ⇒ {
 
-              val framerConfigFile = new File(b.getAbsoluteFile + "/" + "framer"+"/"+"config.json")
-              val lines: String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
-              val config = JsonParser(lines).convertTo[FramerConfig]
-              // returns pathnames for files and directory
-              val paths = f.listFiles();
-              // for each pathname in pathname array
-              for (path <- paths) {
-                try {
-                  uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
-                } catch {
-                  case e: QiniuException =>
-                    e.printStackTrace()
+              p.entity.toStrict(5.seconds).map(res => {
+                val inputStream = res.dataBytes.runWith(
+                  StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS)))
+                val date = new Date
+                val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
+                val b = new File("/tmp/my-zip" + "/" + df.format(date))
+                Unzip.unzip(inputStream, b.toPath)
+                val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
+                val f = new File(b.getAbsoluteFile + "/" + "images")
+
+                val framerConfigFile = new File(b.getAbsoluteFile + "/" + "framer" + "/" + "config.json")
+                val lines: String = FileUtils.readFileToString(framerConfigFile, "UTF-8");
+                val config = JsonParser(lines).convertTo[FramerConfig]
+                // returns pathnames for files and directory
+                val paths = f.listFiles();
+                // for each pathname in pathname array
+                for (path <- paths) {
+                  try {
+                    uploadManager.put(path.getAbsolutePath, df.format(date) + path.getName, token)
+                  } catch {
+                    case e: QiniuException =>
+                      e.printStackTrace()
+                  }
                 }
-              }
-              val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a,
-                config))
+                val a = new PagedSeqReader(reader);
+                FramerParser.parse(a,
+                  config)
+              })
+            }
 //                FramerConfig("apple-iphone-5s-gold", CdnUrl + df.format(date))
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
@@ -160,13 +164,15 @@ trait Service extends Protocols {
           entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
             complete {
               formdata.parts.mapAsync(1) { p ⇒
-                val inputStream = p.entity.dataBytes.runWith(
-                  StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
-                )
-                val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
-                val a = new PagedSeqReader(reader);
-                Future.successful(FramerParser.parse(a,
-                  FramerConfig("apple-iphone-5s-gold", "")))
+                 p.entity.toStrict(5.seconds).map(res => {
+                   val inputStream =             res.dataBytes.runWith(
+                                       StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))
+                                     )
+                                     val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
+                                     val a = new PagedSeqReader(reader);
+                     FramerParser.parse(a,
+                       FramerConfig("apple-iphone-5s-gold", ""))
+                })
               }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
             }
           }
