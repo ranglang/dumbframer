@@ -33,7 +33,7 @@ import ch.megard.akka.http.cors.CorsSettings
 import com.qiniu.common.{QiniuException, Zone}
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
-import utl.Unzip
+import utl.{FramerConfig, Unzip}
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 case class IpPairSummaryRequest(ip1: String, ip2: String)
@@ -143,7 +143,9 @@ trait Service extends Protocols {
                 }
               }
               val a = new PagedSeqReader(reader);
-              Future.successful(FramerParser.parse(a, Some(CdnUrl + df.format(date))))
+              Future.successful(FramerParser.parse(a,
+                FramerConfig("apple-iphone-5s-gold", CdnUrl + df.format(date))
+              ))
             }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
           }
         }
@@ -157,7 +159,8 @@ trait Service extends Protocols {
                 )
                 val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
                 val a = new PagedSeqReader(reader);
-                Future.successful(FramerParser.parse(a, Option.empty[String]))
+                Future.successful(FramerParser.parse(a,
+                  FramerConfig("apple-iphone-5s-gold", "")))
               }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)).map(generatorHtml)
             }
           }
