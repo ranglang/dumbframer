@@ -44,15 +44,14 @@ class TestKitUsageSpec
   val seqRef =
     system.actorOf(Props(classOf[SequencingActor], testActor, headList, tailList))
 
-//  implicit val system = ActorSystem("QuickStart")
   implicit val materializer = ActorMaterializer()
 
-  override def afterAll {
-    shutdown()
-  }
+//  override def afterAll {
+//    shutdown()
+//  }
 
-  "a" should {
-    "2" in {
+  "Akka Stream" should {
+    "should be fitered" in {
       val pairs = Source.fromGraph(GraphDSL.create() { implicit b =>
         import GraphDSL.Implicits._
 
@@ -71,7 +70,9 @@ class TestKitUsageSpec
       val firstPair: Future[(Int, Int)] = pairs.runWith(Sink.head)
       Await.result(firstPair,3000.millis) should be ((1,2))
     }
-    "a" in {
+
+
+    "should choose max one" in {
       val pickMaxOfThree = GraphDSL.create() { implicit b =>
         import GraphDSL.Implicits._
 

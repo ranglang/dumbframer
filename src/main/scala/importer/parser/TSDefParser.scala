@@ -22,12 +22,38 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "true", "false",
     // Additional keywords of FramerJs
     "Layer", "width", "x", "y", "html", "style",
-    "parent", "height", "backgroundColor", "Align", "center", "left",
+    "parent", "height", "backgroundColor", "Align", "center", "left","bottom",
     "top", "point", "size", "right", "image", "Import", "file", "PageComponent", "Framer", "Importer", "load"
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
     "title", "author", "twitter", "description", "Info",
-    "borderWidth", "textAlign", "center", "fontSize", "textHeight", "color"
+    "borderWidth", "textAlign", "center", "fontSize",
+    "lineHeight", "color",
+    "background","backgroundAttachment",
+    "backgroundColor","backgroundImage","backgroundPosition",
+    "backgroundRepeat", "border","borderBottom","borderBottomColor",
+    "borderBottomStyle","borderBottomWidth","borderColor",
+    "borderLeft","borderLeftColor","borderLeftStyle","borderLeftWidth",
+    "borderRight","borderRightColor","borderRightStyle","borderRightWidth",
+    "borderStyle","borderTop","borderTopColor","borderTopStyle","borderTopWidth",
+    "borderWidth","clear","clip","color","cursor","display","filter","font",
+    "fontFamily","fontSize","fontVariant", "fontWeight",
+    "height", "left", "letterSpacing", "listStyle", "listStyleImage",
+    "listStylePosition", "listStyleType", "margin", "marginBottom", "marginLeft",
+    "marginRight", "marginTop", "overflow", "padding", "paddingBottom", "paddingLeft",
+    "paddingRight", "paddingTop", "pageBreakAfter", "pageBreakBefore", "position",
+    "cssFloat", "textAlign", "textDecoration", "textDecorationBlink", "textDecorationLineThrough",
+    "textDecorationNone", "textDecorationOverline","textDecorationUnderline",
+    "textIndent", "textTransform", "top","verticalAlign", "visibility","width", "zIndex",
+    "ScrollComponent", "opacity",
+    "shadowSpread",
+    "shadowColor","borderRadius",
+    "shadowY", "scrollHorizontal",
+    "shadowX",
+    "shadowBlur",
+    "borderTopLeftRadius",
+    "borderTopRightRadius",
+    "borderStyle","content","stateCycle","states","animationOptions","curve"
   )
 
   lexical.delimiters ++= List(
@@ -44,8 +70,19 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   }
 
   lazy val EventDecl: Parser[DeclTree] =
-    identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> "Click" ~> "," ~> "(" ~> "event" ~> "," ~> "layer" ~> ")" ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
+    identifier ~ ("." ~> "on" ~> "Events" ~> "." ~> ("Click") ~> "," ~> opt("(" ~> stringLit ~> "," ~> stringLit ~> ")") ~> "->" ~> rep(setProgressDecl)) ^^ EventIdent
 
+  lazy val StatesDecl: Parser[DeclTree] =
+    identifier ~( ("." ~> "states" ~> "=") ~> rep(StateDecl)) ^^ StatesIdent
+
+  lazy val AnimationsDecl: Parser[DeclTree] =
+    identifier ~( ("." ~> "animationOptions" ~> "=") ~> rep(AnimationDecl)) ^^ AnimationIdent
+
+  lazy val AnimationDecl: Parser[TermTree] =
+    "curve" ~> ":" ~> stringLit ^^ CurveIdent
+
+  val StateDecl:  Parser[TermTree] =
+      identifier ~ (":" ~> parameterBody) ^^ StateIdent
 
   lazy val moduleElementDecl1: Parser[DeclTree] = (
     framerLayerDecl |
@@ -57,7 +94,9 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       setParentDecl |
       frameInfoDecl |
       framerImporterDecl |
-      setVisibleDecl
+      setVisibleDecl |
+      StatesDecl|
+      AnimationsDecl
     )
 
   lazy val frameInfoDecl: Parser[DeclTree] =
@@ -67,7 +106,8 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~> "=" ~> "Framer" ~> "." ~> "Importer" ~> "." ~> "load" ~> "(" ~> stringLit ~> ")" ^^ ImportFileIdent
 
   lazy val setProgressDecl: Parser[DeclTree] =
-    repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent
+    repsep(identifier, ".") ~ ("=" ~> numericLit) ^^ SetProgressIdent |
+      (identifier<~ ".") ~( "stateCycle" ~> "("~>repsep(stringLit,",")~>")") ^^ SetProgress2Ident
 
   lazy val setParentDecl: Parser[DeclTree] =
     repsep(identifier, ".") ~ ("parent" ~> "=" ~> identifier) ^^ SetParentIdent
@@ -80,7 +120,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 
   lazy val framerPageDecl: Parser[DeclTree] =
-    identifier ~ ("=" ~> "new" ~> "PageComponent" ~> parameterBody) ^^ PageDecl
+    identifier ~ ("=" ~> "new" ~> ("PageComponent"| "ScrollComponent" ) ~> parameterBody) ^^ PageDecl
 
   lazy val snapToDecl: Parser[DeclTree] =
     identifier ~ ("." ~> "snapToPage" ~> "(" ~> identifier <~ ")") ^^ SnapToIdent
@@ -101,35 +141,62 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
         case "false" => false
       } ^^ VisibleIdent |
       "image" ~> ":" ~> stringLit ^^ ImageIdent |
+      "opacity"~>":" ~> valueDecl ^^ OpacityIdent |
+      "shadowSpread"~>":" ~> valueDecl ^^ ShadowSpreadIdent |
+      "shadowColor"~>":" ~> valueDecl ^^ ShadowColorIdent |
+      "shadowY"~>":" ~> valueDecl ^^ ShadowYIdent |
+      "shadowX"~>":" ~> valueDecl ^^ ShadowXIdent |
+      "shadowBlur"~>":" ~> valueDecl ^^ ShadowBlurIdent |
       "html" ~> ":" ~> stringLit ^^ HtmlIdent |
-      "parent" ~> ":" ~> identifier ^^ ParentIdent |
+      "parent" ~> ":" ~> identifier<~opt("." ~> "content") ^^ ParentIdent |
       "width" ~> ":" ~> valueDecl ^^ WidthIdent |
       "height" ~> ":" ~> valueDecl ^^ HeightIdent |
       ("scrollVertical" ~> ":") ~> valueDecl ^^ ScrollVerticalIdent |
+      ("scrollHorizontal" ~> ":") ~> valueDecl ^^ ScrollHorizontal|
       ("clip" ~> ":") ~> ("true" | "false") ^^ ClipIdent |
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
+      ("lineHeight" ~> ":" ~> numericLit) ^^ LineHeightIdent |
+//      ("borderLeft" ~> ":" ~> valueDecl) ^^ BorderLeftIdent |
+//      ("borderRight" ~> ":" ~> valueDecl) ^^ BorderRightIdent |
+      ("padding" ~> ":" ~> valueDecl) ^^ PaddingIdent |
+      ("paddingLeft" ~> ":" ~> valueDecl) ^^ PaddingLeftIdent |
+      ("paddingRight" ~> ":" ~> valueDecl) ^^ PaddingRightIdent |
+      ("paddingTop" ~> ":" ~> valueDecl) ^^ PaddingTopIdent |
+      ("paddingBottom" ~> ":" ~> valueDecl) ^^ PaddingBottomIdent |
+      ("borderTopLeftRadius" ~> ":" ~> valueDecl) ^^ BorderTopLeftRadiusIdent |
+      ("borderTopRightRadius" ~> ":" ~> valueDecl) ^^ BorderTopRightRadiusIdent |
+      ("borderStyle" ~> ":" ~> valueDecl) ^^ BorderTopRightRadiusIdent |
       ("textAlign" ~> ":" ~> stringLit) ^^ StyleTextAlignIdent |
-      ("fontSize" ~> ":" ~> stringLit) ^^ StyleFontSizeIdent |
-      ("textHeight" ~> ":" ~> stringLit) ^^ LineHeightIdent |
-      ("color" ~> ":" ~> stringLit) ^^ FontColorIdent
+      ("color" ~> ":" ~> stringLit) ^^ FontColorIdent |
+      ("borderColor" ~> ":" ~> stringLit) ^^ BorderColorIdent |
+      ("fontSize" ~> ":" ~> numericLit ^^ StyleFontSizeIdent)
 
+  def stringOf(p: => Parser[Char]): Parser[String] = rep(p) ^^ chars2string
+  private def chars2string(chars: List[Char]) = chars mkString ""
+
+  lazy val styleValue:Parser[String] = {
+       numericLit <~ "px"
+  }
 
   lazy val addPageDecl: Parser[DeclTree] =
     (identifier <~ "." <~ "addPage" <~ "(") ~ (identifier <~ ",") ~ stringLit <~ ")" ^^ AddPageIdent
 
+
+
   lazy val valueDecl: Parser[ValueTree] =
-    (numericLit ^^ StringIdent |
+    (opt("-")~>numericLit ^^ StringIdent |
       ("true" | "false") ^^ {
         case "true" => true
         case "false" => false
       } ^^ BooleanValueIdent |
-      "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident |
+      "Align" ~> "." ~> ("center" | "left" | "right" | "top" | "bottom" ) ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident |
       (identifier <~ ".") ~ ("width" | "height") ^^ ValueWithIdent
       )
 
   lazy val identifier =
     identifierName ^^ Ident
+
 
   lazy val identifierName =
     accept("IdentifierName", {

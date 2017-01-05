@@ -1,0 +1,4 @@
+_6 = new Layer
+	style:
+		fontSize: "20px"
+		lineHeight: "30px"

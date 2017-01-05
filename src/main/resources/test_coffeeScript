@@ -1,0 +1,3 @@
+_6 = new Layer
+	style:
+		fontSize: "30px"

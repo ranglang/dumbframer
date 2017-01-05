@@ -1,79 +1,77 @@
+import java.io.File
+
+import akka.actor.ActorSystem
 import akka.event.NoLogging
+
+import scala.concurrent.duration._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.Flow
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Flow, Source}
+import akka.util.Timeout
 import com.qiniu.common.Zone
 import com.qiniu.storage.{Configuration, UploadManager}
 import com.qiniu.util.Auth
 import org.scalatest._
 
+import scala.concurrent.{Await, Future}
+
 class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
   override def testConfigSource = "akka.loglevel = WARNING"
+
   override def config = testConfig
+
   override val logger = NoLogging
 
-  val AccessKey ="31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
+  val AccessKey = "31IUl_ItncsjETFG8OIl902ebArYoaafs4q6g56u"
   val SecretKey = "3iW8-rI-FtGUP_di_fjaDOVi_Msj7f1VZE_siL_O"
-  val BucketName ="tingshuo"
+  val BucketName = "tingshuo"
   val auth = Auth.create(AccessKey, SecretKey);
   val z = Zone.zone0();
   val c = new Configuration(z);
 
   override implicit val CdnUrl = "http://7xk03v.com1.z0.glb.clouddn.com/"
-  override  implicit val token = auth.uploadToken(BucketName)
+  override implicit val token = auth.uploadToken(BucketName)
   override implicit val uploadManager = new UploadManager(c)
-  val ip1Info = IpInfo("8.8.8.8", Option("United States"), Option("Mountain View"), Option(37.386), Option(-122.0838))
-  val ip2Info = IpInfo("8.8.4.4", Option("United States"), None, Option(38.0), Option(-97.0))
-  val ipPairSummary = IpPairSummary(ip1Info, ip2Info)
+  import scala.concurrent.duration._
+  import akka.actor.ActorSystem
+  import akka.testkit._
+//  dilated
+  implicit def default(implicit system: ActorSystem) = RouteTestTimeout(100.second)
+  akka.http.scaladsl.testkit.RouteTestTimeout.default
 
-  override lazy val ipApiConnectionFlow = Flow[HttpRequest].map { request =>
-    if (request.uri.toString().endsWith(ip1Info.query))
-      HttpResponse(status = OK, entity = marshal(ip1Info))
-    else if(request.uri.toString().endsWith(ip2Info.query))
-      HttpResponse(status = OK, entity = marshal(ip2Info))
-    else
-      HttpResponse(status = BadRequest, entity = marshal("Bad ip format"))
+  def createEntity(file: File): Future[RequestEntity] = {
+    println(file.getAbsoluteFile)
+    val formData =
+      Multipart.FormData(
+        Source.single(
+          Multipart.FormData.BodyPart(
+            "test",
+            HttpEntity.fromPath(MediaTypes.`application/octet-stream`, file.toPath),
+            Map("filename" -> file.getName)))).toStrict(1.minute)
+    Marshal(formData).to[RequestEntity]
   }
 
-  "Service" should "respond to single IP query" in {
-    Get(s"/ip/${ip1Info.query}") ~> routes ~> check {
-      status shouldBe OK
-      contentType shouldBe `application/json`
-      responseAs[IpInfo] shouldBe ip1Info
-    }
-
-    Get(s"/ip/${ip2Info.query}") ~> routes ~> check {
-      status shouldBe OK
-      contentType shouldBe `application/json`
-      responseAs[IpInfo] shouldBe ip2Info
-    }
+  "Service" should
+    "update file" in {
+    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
+      Post(s"/uploadzip", entity) ~> routes ~> check {
+        status shouldBe OK
+        responseAs[String] should (include("html"))
+      }
+    })
+    Await.result(a, 100.seconds)
   }
 
-  it should "respond to IP pair query" in {
-    Post(s"/ip", IpPairSummaryRequest(ip1Info.query, ip2Info.query)) ~> routes ~> check {
+  "Service" should "return string ip" in {
+    Get(s"/ip") ~> routes ~> check {
       status shouldBe OK
-      contentType shouldBe `application/json`
-      responseAs[IpPairSummary] shouldBe ipPairSummary
-    }
-  }
-
-  it should "respond with bad request on incorrect IP format" in {
-    Get("/ip/asdfg") ~> routes ~> check {
-      status shouldBe BadRequest
-      responseAs[String].length should be > 0
+      responseAs[String] shouldBe "ip"
     }
 
-    Post(s"/ip", IpPairSummaryRequest(ip1Info.query, "asdfg")) ~> routes ~> check {
-      status shouldBe BadRequest
-      responseAs[String].length should be > 0
-    }
-
-    Post(s"/ip", IpPairSummaryRequest("asdfg", ip1Info.query)) ~> routes ~> check {
-      status shouldBe BadRequest
-      responseAs[String].length should be > 0
-    }
   }
 }

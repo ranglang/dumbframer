@@ -32,6 +32,10 @@ object Trees {
     override def name: String = "point"
   }
 
+  case class CurveIdent(curve: String) extends TermTree with PropertyName {
+    override def name: String = "curve"
+  }
+
   case class SizeIdent(iden: Ident) extends TermTree with PropertyName {
     override def name: String = "size"
   }
@@ -48,9 +52,32 @@ object Trees {
     override def name: String = "style"
   }
 
+//  case class EventIdent(ident: Ident, members: List[DeclTree]) extends DeclTree with PropertyName {
+//    override def name: String = "size"
+//  }
+  case class StatesIdent(state: Ident ,list: List[TermTree]) extends DeclTree with PropertyName {
+    override def name: String = "states"
+  }
+
+  case class AnimationIdent(state: Ident ,list: List[TermTree]) extends DeclTree with PropertyName {
+    override def name: String = "animation"
+  }
+
+  case class StateIdent(state: Ident ,list: List[TermTree]) extends TermTree with PropertyName {
+    override def name: String = "state"
+  }
+
   case class EmptyIdent(str: String) extends TermTree
 
+  case class SetProgress1Ident(any:Any) extends DeclTree with PropertyName {
+    override def name: String = "setProgress"
+  }
+
   case class SetProgressIdent(paraName: List[Ident], paraValue: String) extends DeclTree with PropertyName {
+    override def name: String = "setProgress"
+  }
+
+  case class SetProgress2Ident(paraName: Ident, paraValue: Any) extends DeclTree with PropertyName {
     override def name: String = "setProgress"
   }
 
@@ -84,8 +111,11 @@ object Trees {
   case class StyleTextAlignIdent(value: String) extends TermTree
 
   case class StyleFontSizeIdent(value: String) extends TermTree
+
   case class LineHeightIdent(value: String) extends TermTree
   case class FontColorIdent(value: String) extends TermTree
+
+  case class BorderColorIdent(value: String) extends TermTree
 
   case class WidthIdent(value: ValueTree) extends TermTree
 
@@ -104,21 +134,52 @@ object Trees {
 
   case class ScrollVerticalIdent(bool: ValueTree) extends TermTree
 
+  case class ScrollHorizontal(bool: ValueTree) extends TermTree
+
+  case class OpacityIdent(value: ValueTree) extends TermTree
+
+  case class BorderTopLeftRadiusIdent(value: ValueTree) extends TermTree
+
+  case class BorderLeftWidthIdent(value: ValueTree) extends TermTree
+  case class BorderRightWidthIdent(value: ValueTree) extends TermTree
+  case class BorderTopWidthIdent(value: ValueTree) extends TermTree
+  case class BorderBottomWidthIdent(value: ValueTree) extends TermTree
+
+  case class PaddingIdent(value: ValueTree) extends TermTree
+  case class PaddingLeftIdent(value: ValueTree) extends TermTree
+  case class PaddingRightIdent(value: ValueTree) extends TermTree
+  case class PaddingTopIdent(value: ValueTree) extends TermTree
+  case class PaddingBottomIdent(value: ValueTree) extends TermTree
+
+
+  case class BorderTopRightRadiusIdent(value: ValueTree) extends TermTree
+  case class BorderStyleIdent (value: ValueTree) extends TermTree
+
+  case class ShadowSpreadIdent(value: ValueTree) extends TermTree
+  case class ShadowColorIdent(value: ValueTree) extends TermTree
+  case class ShadowYIdent(value: ValueTree) extends TermTree
+  case class ShadowXIdent(value: ValueTree) extends TermTree
+  case class ShadowBlurIdent(value: ValueTree) extends TermTree
+
   case class ClipIdent(bool: String) extends ValueTree with PropertyName {
     override def name: String = "scrollVertical"
+
   }
 
   case class NumberIdent(name: String) extends ValueTree with PropertyName {
   }
 
-  case class StringIdent(name: String) extends ValueTree
+  case class StringIdent(name: String) extends ValueTree {
+  }
 
-  case class BooleanValueIdent(name: Boolean ) extends ValueTree
+  case class BooleanValueIdent(name: Boolean ) extends ValueTree {
+  }
 
   case class Value3Ident(name: String, calculate: Option[String], num: Option[String]) extends ValueTree with PropertyName {
   }
 
-  case class ValueWithIdent(content: Ident, value: String) extends ValueTree
+  case class ValueWithIdent(content: Ident, value: String) extends ValueTree {
+  }
 
   case class Ident(name: String) extends Tree with PropertyName {
     Ident.requireValidIdent(name)

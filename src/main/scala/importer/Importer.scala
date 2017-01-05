@@ -7,6 +7,7 @@ package importer
 
 import importer.Trees._
 import importer.sc._
+import utl.FramerConfig
 
 import scala.collection.mutable.ListBuffer
 
@@ -25,11 +26,11 @@ class Importer() {
     rootPackage
   }
 
-  def parse(declarations: List[DeclTree], outputPackage: String, projectPath: Option[String]): ParseResult = {
+  def parse(declarations: List[DeclTree], outputPackage: String, framerConfig: FramerConfig): ParseResult = {
     val rootPackage = new PackageSymbol(Name.EMPTY)
     for (declaration <- declarations)
       processDecl(rootPackage, declaration)
-    Printer.printSymbol(rootPackage, projectPath)
+    Printer.printSymbol(rootPackage, framerConfig)
   }
 
 
@@ -56,11 +57,18 @@ class Importer() {
   final def handleTextSymbol (owner: ContainerSymbol,layer: LayerDecl, html: HtmlIdent) = {
     val name = Name(layer.name.name)
     val params = layer.members
+
     params.collectFirst {
       case str: ParentIdent => str
     } match {
       case Some(parentIdent) =>
-        val container = new TextSymbol(name, html.value, params, Some(parentIdent.value.name))
+        val container =
+          if( html.value.startsWith(">"))
+            new InputSymbol(name,"text", html.value.substring(1), params, Some(parentIdent.value.name))
+          else if(html.value.startsWith("*"))
+            new InputSymbol(name,"password", html.value.substring(1), params, Some(parentIdent.value.name))
+          else
+            new TextSymbol(name, html.value, params, Some(parentIdent.value.name))
         owner.getLayer(Name(parentIdent.value.name)) match {
           case a: PageSymbol =>
             a.members += container
@@ -68,7 +76,12 @@ class Importer() {
             a.members += container
         }
       case None =>
-        val container = new TextSymbol(name, html.value, params, None)
+        val container =
+          if( html.value.startsWith(">"))
+            new InputSymbol(name,"text", html.value.substring(1), params, None)
+          else if(html.value.startsWith("*"))
+            new InputSymbol(name,"password", html.value.substring(1), params, None)
+          else new TextSymbol(name, html.value, params, None)
         owner.members += container
     }
   }
