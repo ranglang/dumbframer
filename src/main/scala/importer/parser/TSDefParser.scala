@@ -22,7 +22,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "true", "false",
     // Additional keywords of FramerJs
     "Layer", "width", "x", "y", "html", "style",
-    "parent", "height", "backgroundColor", "Align", "center", "left",
+    "parent", "height", "backgroundColor", "Align", "center", "left","bottom",
     "top", "point", "size", "right", "image", "Import", "file", "PageComponent", "Framer", "Importer", "load"
     , "on", "Events", "event", "layer", "Click", "addPage",
     "snapToPage", "new", "visible", "height", "scrollVertical", "clip",
@@ -47,7 +47,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
     "textIndent", "textTransform", "top","verticalAlign", "visibility","width", "zIndex",
     "ScrollComponent", "opacity",
     "shadowSpread",
-    "shadowColor",
+    "shadowColor","borderRadius",
     "shadowY", "scrollHorizontal",
     "shadowX",
     "shadowBlur",
@@ -190,7 +190,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
         case "true" => true
         case "false" => false
       } ^^ BooleanValueIdent |
-      "Align" ~> "." ~> ("center" | "left" | "right" | "top") ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident |
+      "Align" ~> "." ~> ("center" | "left" | "right" | "top" | "bottom" ) ~ opt("-" | "+") ~ opt(numericLit) ^^ Value3Ident |
       (identifier <~ ".") ~ ("width" | "height") ^^ ValueWithIdent
       )
 

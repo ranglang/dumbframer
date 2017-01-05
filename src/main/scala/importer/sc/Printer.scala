@@ -72,9 +72,10 @@ object Printer {
       case PaddingIdent(v @StringIdent(value)) => value.toDouble
     }
 
-    val isRelative:Boolean = list.collectFirst {
-      case  XIdent(v @Value3Ident(pos,optCal,optStr)) => v
-      case  YIdent(v @Value3Ident(pos,optCal,optStr)) => v
+    val isRelative:Boolean =
+          list.collectFirst {
+      case  XIdent(v @Value3Ident(pos,optCal,optStr)) if optCal == Some("pos") => v
+      case  YIdent(v @Value3Ident(pos,optCal,optStr))if optCal == Some("pos") => v
     } match {
       case Some(ident) => true
       case None =>  false
@@ -178,8 +179,22 @@ object Printer {
           if (r.contains("border-style")) r else r + "border-style: solid;\n"
         case BackGroundColorIdent(color) =>
           result + "background-color: " + color + ";\n"
-        case YIdent(v @Value3Ident(pos,optCal,optStr)) =>
+
+        case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
+            case "bottom" if (optCal==Some("-")) =>
+              println(v.toString);
+              print(pxOpt.get)
+              println(v.toString);
+              println(v.toString);
+              if(ifResponsive) result + "bottom: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
+                result + "bottom: " + pxOpt.get.toDouble + "px;" + "\n"
+            case "top" if (optCal==Some("-")) =>
+              println(v.toString);
+              print(pxOpt.get)
+              println(v.toString);
+              if(ifResponsive) result + "top: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
+                result + "top: " + pxOpt.get.toDouble + "px;" + "\n"
             case "center" => {
               if(result.contains("position"))
               result + "margin-top: auto;\nmargin-bottom: auto;\n"
