@@ -157,9 +157,12 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
       "size" ~> ":" ~> (identifier <~ "." <~ "size") ^^ SizeIdent |
       "style" ~> ":" ^^ EmptyIdent |
       ("lineHeight" ~> ":" ~> numericLit) ^^ LineHeightIdent |
-//      ("borderLeft" ~> ":" ~> valueDecl) ^^ BorderLeftIdent |
-//      ("borderRight" ~> ":" ~> valueDecl) ^^ BorderRightIdent |
       ("padding" ~> ":" ~> valueDecl) ^^ PaddingIdent |
+  ("marginLeft" ~> ":" ~> valueDecl) ^^ MarginLeftIdent |
+    ("marginRight" ~> ":" ~> valueDecl) ^^ MarginRightIdent |
+    ("marginTop" ~> ":" ~> valueDecl) ^^ MarginTopIdent |
+    ("marginBottom" ~> ":" ~> valueDecl) ^^ MarginBottomIdent |
+    ("paddingRight" ~> ":" ~> valueDecl) ^^ PaddingRightIdent |
       ("paddingLeft" ~> ":" ~> valueDecl) ^^ PaddingLeftIdent |
       ("paddingRight" ~> ":" ~> valueDecl) ^^ PaddingRightIdent |
       ("paddingTop" ~> ":" ~> valueDecl) ^^ PaddingTopIdent |

@@ -243,6 +243,18 @@ object Printer {
         case PaddingRightIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "paddingRight: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
             result + "padding-right: \"" + value +"px\", "
+        case MarginTopIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "marginTop: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "marginTop: \"" + value +"px\", "
+        case MarginRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "marginRight: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "marginRight: \"" + value +"px\", "
+        case MarginLeftIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "marginLeft: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "marginLeft: \"" + value +"px\", "
+        case MarginBottomIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "marginBottom: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
+            result + "marginBottom: \"" + value +"px\", "
         case PaddingTopIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "paddingTop: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
             result + "paddingTop: \"" + value +"px\", "
@@ -475,6 +487,18 @@ object Printer {
         case StyleFontSizeIdent(v) =>
           if(ifResponsive) result + "font-size: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "font-size: " + v + "px;\n"
+        case MarginBottomIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "margin-bottom: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "margin-bottom: " + value +"px;\n"
+        case MarginTopIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "margin-top: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "margin-top: " + value +"px;\n"
+        case MarginLeftIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "margin-left: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "margin-left: " + value +"px;\n"
+        case MarginRightIdent(v@StringIdent(value)) =>
+          if(ifResponsive) result + "margin-right: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
+            result + "margin-right: " + value +"px;\n"
         case PaddingBottomIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "padding-bottom: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
             result + "padding-bottom: " + value +"px;\n"
@@ -620,7 +644,7 @@ object Printer {
     val initialStack: mutable.Stack[Symbol] = mutable.Stack(initialSym)
     val hm: mutable.HashMap[Int, mutable.Stack[Symbol]] = new mutable.HashMap[Int, mutable.Stack[Symbol]]()
     hm.put(1, initialStack)
-    factorialAcc(1, hm, ParseResult("", "")) //免添加 <div>
+    factorialAcc(1, hm, ParseResult("", ""))
   }
 
   final def printSymbol(initialSym: Symbol, framerConfig: FramerConfig): ParseResult = {
@@ -631,8 +655,8 @@ object Printer {
       }
       else {
         hashMap(current).length match {
-          case a: Int if a == 0 && current > 1 =>
-            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current-1)+"</div>\n" , parseResult.css))
+          case a: Int if a == 0 && current > 0 =>
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+"</div>\n" , parseResult.css))
           case a: Int if a == 1 =>
             val a = hashMap(current).pop()
             a match {

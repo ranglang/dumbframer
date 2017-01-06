@@ -49,13 +49,24 @@ class ParseFileSpec
 //  }
 //
 //
-//  "FramerCongfig" should {
-//    "should paser file" in {
-//      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
-//      val c = new PagedSeqReader(reader);
-//      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-//      result.css.contains("display: flex") shouldBe true
-//    }
+  "FramerCongfig" should {
+    "should paser file" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css.contains("display: flex") shouldBe true
+    }
+    "should paser file2" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testMargin.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css.contains("margin-right") shouldBe true
+
+      val result1 = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result1.html should (include("marginRight"))// shouldBe true
+      result1.html shouldBe ""
+    }
+  }
 //
 //    "should paser file right" in {
 //      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testRight.coffee")))
