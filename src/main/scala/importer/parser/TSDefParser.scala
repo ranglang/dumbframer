@@ -115,7 +115,6 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val setVisibleDecl: Parser[DeclTree] =
     rep1(rep(identifier <~ "."), "visible") ~ ("=" ~> valueDecl) ^^ SetVisibleIdent
 
-
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 

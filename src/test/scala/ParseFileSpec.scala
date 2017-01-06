@@ -65,6 +65,44 @@ class ParseFileSpec
       val result1 = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
       result1.html should (include("marginRight"))// shouldBe true
     }
+
+    "should test textAlign" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css should  (include("text-align"))
+
+      val result_vnode = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result_vnode.html should (include ("textAlign"))
+
+    }
+
+    "should include image" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testImageSrc.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.html should  (include("prop"))
+      result.html should  (include("src"))
+
+      //      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign.coffee")))
+      //      val c = new PagedSeqReader(reader);
+      //      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      //      result.css should  (include("text-align"))
+
+    }
+
+    "should include textAlign" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign1.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css should  (include("text-align"))
+
+      //      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign.coffee")))
+      //      val c = new PagedSeqReader(reader);
+      //      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      //      result.css should  (include("text-align"))
+
+    }
   }
 //
 //    "should paser file right" in {

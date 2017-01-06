@@ -127,7 +127,6 @@ object Printer {
     }
 
 
-
     def getPosition(): String = {
       if(!isRelative) "position: \"absolute\","
       else "position: \"relative,\" "
@@ -146,6 +145,14 @@ object Printer {
         case None => "borderWidth: \"0px\", "
       }
 
+    def textAlign(): String =
+      list.collectFirst  {
+        case StyleTextAlignIdent(v ) => v
+      } match {
+        case Some(v) => "textAlign: \""+v+"\",";
+        case None => "textAlign: \"left\", "
+      }
+
     def getPaddingWidth(): String =
       list.collectFirst  {
         case PaddingIdent(v @StringIdent(value)) => value.toDouble
@@ -158,7 +165,7 @@ object Printer {
         case None => "padding: \"0px\", "
       }
 
-    list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth)((result, term) =>
+    list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth+ textAlign)((result, term) =>
       term match {
         case HeightIdent(v@StringIdent(s1)) =>
           val s = s1.toDouble -paddingTopWidth - paddingBottomWidth - (2 * borderWithOpt.getOrElse(0.toDouble))
@@ -229,14 +236,14 @@ object Printer {
         case BorderRadiusIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "borderRadius: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
             result + "borderRadius: \"" + value + "px\", "
-        case StyleTextAlignIdent(v) =>
-          result + "textAlign: \"" + v + "\", "
+//        case StyleTextAlignIdent(v) =>
+//          result + "textAlign: \"" + v + "\", "
         case LineHeightIdent(v) =>
           if(ifResponsive) result + "lineHeight: \"" + v.toDouble / SCREEN_WIDTH  + "rem\"," else
             result + "lineHeight: \"" + v + "px\", "
         case StyleFontSizeIdent(v) =>
           if(ifResponsive) result + "fontSize: \"" + v.toDouble / SCREEN_WIDTH  + "rem\"," else
-            result + "fontSize: " + v + "px\", "
+            result + "fontSize: \"" + v + "px\", "
         case PaddingBottomIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "paddingBottom: \"" + value.toDouble / SCREEN_WIDTH  + "rem\"," else
             result + "paddingBottom: \"" + value +"px\", "
@@ -408,7 +415,15 @@ object Printer {
         case None => "padding: 0px;\n"
       }
 
-   list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth)((result, term) =>
+    def textAlign(): String =
+      list.collectFirst  {
+        case StyleTextAlignIdent(v ) => v
+      } match {
+        case Some(v) => "text-align: "+v+";\n";
+        case None => "text-align: left;\n";
+      }
+
+   list.foldLeft(head + getDisplay + getPosition+getBorderWidth + getPaddingWidth+ textAlign)((result, term) =>
       term match {
         case HeightIdent(v@StringIdent(s1)) =>
           val s = s1.toDouble -paddingTopWidth - paddingBottomWidth - (2 * borderWithOpt.getOrElse(0.toDouble))
@@ -479,8 +494,8 @@ object Printer {
         case BorderRadiusIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "border-radius: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "border-radius: " + value + "px;\n"
-        case StyleTextAlignIdent(v) =>
-          result + "text-align: " + v + ";\n"
+//        case StyleTextAlignIdent(v) =>
+//          result + "text-align: " + v + ";\n"
         case LineHeightIdent(v) =>
           if(ifResponsive) result + "line-height: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "line-height: " + v + "px;\n"
@@ -550,22 +565,22 @@ object Printer {
                     factorialAcc(current + 1, nh, ParseResult(parseResult.html+
                       printTab(current)+"div(\"\",{},["+"\n" , parseResult.css))
                 }
-//              case layer: ImageSymbol =>
-//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+              case layer: ImageSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
 //                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
 //                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "img(\"."+layer.name.name+"\",{"+" props: { src: \""+layer.imageUrl+"\"},"+params2CssStringVnode(layer.params,"")+"})\n",
+                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
 //              case layer: InputSymbol =>
 //                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
 //                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\" />\n" +
 //                  printTab(current-1) +
 //                  "</div>\n",
 //                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
-//              case layer: TextSymbol =>
-//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<a class=\"" + layer.name.name + "\">" + layer.value + "</a>\n" +
-//                  printTab(current-1) +
-//                  "</div>\n",
-//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
+              case layer: TextSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "a(.\""+layer.name.name+"\",{"+params2CssStringVnode(layer.params,"")+"}, \""+layer.value+"\")\n",
+                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: LayerSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
                 layer.members.isEmpty match {
