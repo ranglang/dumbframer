@@ -33,12 +33,10 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   import akka.actor.ActorSystem
 
   import scala.concurrent.duration._
-//  dilated
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(100.second)
   akka.http.scaladsl.testkit.RouteTestTimeout.default
 
   def createEntity(file: File): Future[RequestEntity] = {
-    println(file.getAbsoluteFile)
     val formData =
       Multipart.FormData(
         Source.single(
@@ -60,23 +58,23 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     Await.result(a, 100.seconds)
   }
 
-  "Service" should "test zip upload" in {
-    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
-      Post(s"/uploadzip", entity) ~> routes ~> check {
-        status shouldBe OK
-        responseAs[String] should (include("html"))
-      }
-    })
-    Await.result(a, 100.seconds)
-  }
+//  "Service" should "test zip upload" in {
+//    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
+//      Post(s"/uploadzip", entity) ~> routes ~> check {
+//        status shouldBe OK
+//        responseAs[String] should (include("html"))
+//      }
+//    })
+//    Await.result(a, 100.seconds)
+//  }
 
-  "Service" should "test upload vnode file" in {
-    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
-      Post(s"/uploadVnodezip", entity) ~> routes ~> check {
-        status shouldBe OK
-        responseAs[String] should (include("html"))
-      }
-    })
-    Await.result(a, 100.seconds)
-  }
+//  "Service" should "test upload vnode file" in {
+//    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
+//      Post(s"/uploadVnodezip", entity) ~> routes ~> check {
+//        status shouldBe OK
+//        responseAs[String] should (include("html"))
+//      }
+//    })
+//    Await.result(a, 100.seconds)
+//  }
 }

@@ -191,16 +191,9 @@ object Printer {
         case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
             case "bottom" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
-              println(v.toString);
               if(ifResponsive) result + "bottom: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
                 result + "bottom: \"" + pxOpt.get.toDouble + "px\"," + " "
             case "top" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
               if(ifResponsive) result + "top: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
                 result + "top: \"" + pxOpt.get.toDouble + "px\"," + " "
             case "center" => {
@@ -449,16 +442,9 @@ object Printer {
         case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
             case "bottom" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
-              println(v.toString);
               if(ifResponsive) result + "bottom: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
                 result + "bottom: " + pxOpt.get.toDouble + "px;" + "\n"
             case "top" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
               if(ifResponsive) result + "top: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
                 result + "top: " + pxOpt.get.toDouble + "px;" + "\n"
             case "center" => {
@@ -548,7 +534,6 @@ object Printer {
         ParseResult(parseResult.html, parseResult.css)
       }
       else {
-        println(".."+ hashMap(current).length)
         hashMap(current).length match {
           case a: Int if a == 0 && current > 0 =>
             factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+"])" , parseResult.css))
@@ -571,8 +556,10 @@ object Printer {
 //                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "img(\"."+layer.name.name+"\",{"+" props: { src: \""+layer.imageUrl+"\"},"+params2CssStringVnode(layer.params,"")+"})\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
-//              case layer: InputSymbol =>
-//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+              case layer: InputSymbol =>
+                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
+                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "input(\"."+layer.name.name+"\",{"+" props: { type: \""+layer.inputType+"\", placeHolder: \""+layer.value+"\",},"+params2CssStringVnode(layer.params,"")+"})\n",
+                  params2CssString(layer.params, parseResult.css + " ." + parent + layer.name.name + "{" + "\n") + "}\n"))
 //                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\" />\n" +
 //                  printTab(current-1) +
 //                  "</div>\n",
@@ -724,7 +711,6 @@ object Printer {
                                     params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
                 }
               case sy: Symbol =>
-                println(sy);
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
             }
           case a: Int if a > 1 =>
