@@ -33,6 +33,12 @@ class Importer() {
     Printer.printSymbol(rootPackage, framerConfig)
   }
 
+  def parseVnode(declarations: List[DeclTree], outputPackage: String, framerConfig: FramerConfig): ParseResult = {
+    val rootPackage = new PackageSymbol(Name.EMPTY)
+    for (declaration <- declarations)
+      processDecl(rootPackage, declaration)
+    Printer.printSymbolVNode(rootPackage, framerConfig)
+  }
 
  final def handleImageSymbol (owner: ContainerSymbol,layer: LayerDecl, image:ImageIdent) = {
     val name = Name(layer.name.name)

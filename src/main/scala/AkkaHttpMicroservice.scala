@@ -52,6 +52,7 @@ trait Service extends Protocols {
     val a: String =
       "<html>\n" +
         "<head>\n" +
+        "<style type=\"text/css\" src=\"https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css\"></style>"+
         "<script src=\"http://g.tbcdn.cn/mtb/lib-flexible/0.3.2/??flexible_css.js,flexible.js\"></script>" +
         "<style type=\"text/css\" media=\"screen\">\n" +
         parserResult.css +
@@ -101,6 +102,35 @@ trait Service extends Protocols {
           }
         }
       } ~
+        path("uploadVnodezip") {
+          entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+            complete {
+              formdata.parts.mapAsync(1) { p ⇒ {
+                p.entity.toStrict(1.minute).flatMap(str => {
+                  val inputStream = str.dataBytes.runWith(
+                    StreamConverters.asInputStream(FiniteDuration(100, TimeUnit.SECONDS))
+                  )
+                  val date = new Date
+                  val df = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
+                  val b = new File("/tmp/my-zip" + "/" + df.format(date))
+                  Unzip.unzip(inputStream, b.toPath)
+                  val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream(b.getAbsoluteFile + "/" + "app.coffee")))
+                  val f = new File(b.getAbsoluteFile + "/" + "images")
+                  for {
+                    framerConfig <- readDeviceType(f)
+                    uploadImage <- uploadImage(f, date)
+                  } yield {
+                    val nFramerConfig = framerConfig.copy(projectId = CdnUrl + df.format(date))
+                    val a = new PagedSeqReader(reader);
+                    FramerParser.parseVnode(a, nFramerConfig)
+                  }
+                }
+                )
+              }
+              }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)) //.map(generatorHtml)
+            }
+          }
+        } ~
         path("uploadzip") {
           entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
             println('uploadzip)
@@ -131,6 +161,22 @@ trait Service extends Protocols {
           }
         }
     } ~
+        path("uploadVnode") {
+          entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
+            complete {
+              formdata.parts.mapAsync(1) { p ⇒
+                p.entity.toStrict(5.minute).map(str => {
+                  val inputStream = str.dataBytes.runWith(
+                    StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS)))
+                  val reader = PagedSeq.fromReader(new InputStreamReader(inputStream))
+                  val a = new PagedSeqReader(reader);
+                  FramerParser.parseVnode(a, FramerConfig("apple-iphone-5s-gold", ""))
+                }
+                )
+              }.runFold(ParseResult("", ""))((a, b) => ParseResult(a.html + b.html, a.css + b.css)) //.map(generatorHtml)
+            }
+          }
+        }~
       path("upload") {
         entity(as[Multipart.FormData]) { (formdata: Multipart.FormData) ⇒
           complete {

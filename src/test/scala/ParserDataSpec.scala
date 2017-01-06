@@ -38,7 +38,7 @@ class ParserDataSpec extends  FlatSpec with Matchers{
       ParentIdent(Ident("pageScroller"))), ListBuffer(), Some("package"))
     val parserResult = Printer.printSymbolVNode(packageSymbol,FramerConfig(deviceType = "apple-iphone-5s-gold", "5D61D5B4-85D6-4EE7-9C3B-160981C8DAE4"))
     println(parserResult.html)
-     parserResult.html shouldBe ""
+     parserResult.html should (not include("<"))
   }
 
 
