@@ -64,7 +64,6 @@ class ParseFileSpec
 
       val result1 = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
       result1.html should (include("marginRight"))// shouldBe true
-      result1.html shouldBe ""
     }
   }
 //
