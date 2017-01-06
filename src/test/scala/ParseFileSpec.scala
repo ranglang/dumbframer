@@ -112,10 +112,18 @@ class ParseFileSpec
       result.css.contains("display: flex") shouldBe true
     }
 
-  "should paser input" in {
-    val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testInput.coffee")))
+//  "should paser input" in {
+//    val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testInput.coffee")))
+//    val c = new PagedSeqReader(reader);
+//    val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+//    result.html should (include("input"))
+//  }
+
+  "should paser two layer file hello" in {
+    val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTwoLayer.coffee")))
     val c = new PagedSeqReader(reader);
     val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+    println(result.html)
     result.html should (include("input"))
   }
 //
