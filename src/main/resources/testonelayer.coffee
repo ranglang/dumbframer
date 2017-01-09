@@ -1,0 +1,1 @@
+inputLayer = new Layer
