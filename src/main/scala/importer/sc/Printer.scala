@@ -191,16 +191,16 @@ object Printer {
         case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
             case "bottom" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
-              println(v.toString);
+//              println(v.toString);
+//              print(pxOpt.get)
+//              println(v.toString);
+//              println(v.toString);
               if(ifResponsive) result + "bottom: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
                 result + "bottom: \"" + pxOpt.get.toDouble + "px\"," + " "
             case "top" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
+//              println(v.toString);
+//              print(pxOpt.get)
+//              println(v.toString);
               if(ifResponsive) result + "top: \"" + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem\"," else
                 result + "top: \"" + pxOpt.get.toDouble + "px\"," + " "
             case "center" => {
@@ -449,16 +449,16 @@ object Printer {
         case YIdent(v @Value3Ident(pos,optCal,pxOpt)) =>
           pos match {
             case "bottom" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
-              println(v.toString);
+//              println(v.toString);
+//              print(pxOpt.get)
+//              println(v.toString);
+//              println(v.toString);
               if(ifResponsive) result + "bottom: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
                 result + "bottom: " + pxOpt.get.toDouble + "px;" + "\n"
             case "top" if (optCal==Some("-")) =>
-              println(v.toString);
-              print(pxOpt.get)
-              println(v.toString);
+//              println(v.toString);
+//              print(pxOpt.get)
+//              println(v.toString);
               if(ifResponsive) result + "top: " + pxOpt.get.toDouble / SCREEN_WIDTH  + "rem;\n" else
                 result + "top: " + pxOpt.get.toDouble + "px;" + "\n"
             case "center" => {
@@ -548,10 +548,10 @@ object Printer {
         ParseResult(parseResult.html, parseResult.css)
       }
       else {
-        println(".."+ hashMap(current).length)
+//        println(".."+ hashMap(current).length)
         hashMap(current).length match {
           case a: Int if a == 0 && current > 0 =>
-            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+"])" , parseResult.css))
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current -1 )+"])" , parseResult.css))
           case a: Int if a == 1 =>
             val a = hashMap(current).pop()
             a match {
@@ -670,8 +670,8 @@ object Printer {
       }
       else {
         hashMap(current).length match {
-          case a: Int if a == 0 && current > 0 =>
-            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+"</div>\n" , parseResult.css))
+          case a: Int if a == 0 && current > 1 =>
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current -1 )+"</div>\n" , parseResult.css))
           case a: Int if a == 1 =>
             val a = hashMap(current).pop()
             a match {
@@ -724,7 +724,6 @@ object Printer {
                                     params2CssString(layer.params, "." ++ layer.name.name + "{" + "\n") + "}\n"))
                 }
               case sy: Symbol =>
-                println(sy);
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<div class=\"" + sy.name.name + "\"></div>\n", parseResult.css))
             }
           case a: Int if a > 1 =>

@@ -50,6 +50,23 @@ class ParseFileSpec
 //
 //
   "FramerCongfig" should {
+//    "should paser test one layer" in {
+//      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testonelayer.coffee")))
+//      val c = new PagedSeqReader(reader);
+//      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+////      result.html.split("div") should (have(length(5)))
+//      result.html shouldBe ""
+//    }
+
+    "should paser test multi layer" in {
+            val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testmultilayer.coffee")))
+            val c = new PagedSeqReader(reader);
+            val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      val result1 = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+//      result.html shouldBe ""
+      result1.html shouldBe ""
+    }
+
     "should paser file" in {
       val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/test_coffeeScript")))
       val c = new PagedSeqReader(reader);
@@ -83,12 +100,6 @@ class ParseFileSpec
       val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
       result.html should  (include("prop"))
       result.html should  (include("src"))
-
-      //      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign.coffee")))
-      //      val c = new PagedSeqReader(reader);
-      //      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-      //      result.css should  (include("text-align"))
-
     }
 
     "should include textAlign" in {
@@ -96,11 +107,6 @@ class ParseFileSpec
       val c = new PagedSeqReader(reader);
       val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
       result.css should  (include("text-align"))
-
-      //      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testTextAlign.coffee")))
-      //      val c = new PagedSeqReader(reader);
-      //      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-      //      result.css should  (include("text-align"))
 
     }
   }
