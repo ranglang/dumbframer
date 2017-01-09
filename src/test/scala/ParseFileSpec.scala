@@ -50,13 +50,13 @@ class ParseFileSpec
 //
 //
   "FramerCongfig" should {
-//    "should paser test one layer" in {
-//      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testonelayer.coffee")))
-//      val c = new PagedSeqReader(reader);
-//      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-////      result.html.split("div") should (have(length(5)))
-//      result.html shouldBe ""
-//    }
+    "should paser test one layer" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testonelayer.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+//      result.html.split("div") should (have(length(5)))
+      result.html shouldBe ""
+    }
 
     "should paser test multi layer" in {
             val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testmultilayer.coffee")))
