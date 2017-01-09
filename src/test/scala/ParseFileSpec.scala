@@ -111,14 +111,19 @@ class ParseFileSpec
     }
   }
 //
-//    "should paser file right" in {
-//      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testRight.coffee")))
-//      val c = new PagedSeqReader(reader);
-//      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
-//      println(result.css)
-//      result.css.contains("display: flex") shouldBe true
-//    }
-//  }
+    "should paser file right" in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testRight.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      result.css.contains("display: flex") shouldBe true
+    }
+
+  "should paser input" in {
+    val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testInput.coffee")))
+    val c = new PagedSeqReader(reader);
+    val result = FramerParser.parseVnode(c, FramerConfig("apple-iphone-5s-gold", ""))
+    result.html should (include("input"))
+  }
 //
 //  "FramerCongfig" should {
 //    "should has iphone 5s gold" in {

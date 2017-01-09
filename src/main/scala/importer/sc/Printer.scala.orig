@@ -542,7 +542,7 @@ object Printer {
       else {
         hashMap(current).length match {
           case a: Int if a == 0 && current > 0 =>
-            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current -1 )+"])\n" , parseResult.css))
+            factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current -1 )+"])" , parseResult.css))
           case a: Int if a == 1 =>
             val a = hashMap(current).pop()
             a match {
