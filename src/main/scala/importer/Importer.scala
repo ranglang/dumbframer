@@ -105,9 +105,32 @@ class Importer() {
             a.members += container
           case a: LayerSymbol =>
             a.members += container
+          case a: ScrollerLayerSymbol =>
+            a.members += container
         }
       case None =>
         owner.members += new LayerSymbol(name, params, ListBuffer(), Option.empty[String]);
+    }
+  }
+
+  final def handleScrollerLayerSymbol (owner: ContainerSymbol,layer: ScrollerLayerDecl) = {
+    val name = Name(layer.name.name)
+    val params = layer.members
+    params.collectFirst {
+      case str: ParentIdent => str
+    } match {
+      case Some(parentIdent) =>
+        val container = new ScrollerLayerSymbol(name, params, ListBuffer(), Some(parentIdent.value.name));
+        owner.getLayer(Name(parentIdent.value.name)) match {
+          case a: PageSymbol =>
+            a.members += container
+          case a: LayerSymbol =>
+            a.members += container
+          case a: ScrollerLayerSymbol =>
+            a.members += container
+        }
+      case None =>
+        owner.members += new ScrollerLayerSymbol(name, params, ListBuffer(), Option.empty[String]);
     }
   }
 
@@ -115,6 +138,8 @@ class Importer() {
     declaration match {
       case PageDecl(IdentName(name), params) =>
         owner.members += new PageSymbol(name, params)
+      case  ScrollerLayerDecl(IdentName(name), params) =>
+        handleScrollerLayerSymbol(owner,ScrollerLayerDecl(Ident(name.name),params))
       case  LayerDecl(IdentName(name), params) =>
         params.collectFirst {
           case cat: ImageIdent => cat

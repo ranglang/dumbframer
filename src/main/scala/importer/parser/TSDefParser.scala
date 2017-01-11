@@ -87,6 +87,7 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val moduleElementDecl1: Parser[DeclTree] = (
     framerLayerDecl |
       framerPageDecl |
+      scrollerLayerDecl |
       EventDecl |
       addPageDecl |
       snapToDecl |
@@ -118,8 +119,11 @@ class TSDefParser extends StdTokenParsers with ImplicitConversions {
   lazy val framerLayerDecl: Parser[DeclTree] =
     identifier ~ ("=" ~> "new" ~> "Layer" ~> parameterBody) ^^ LayerDecl
 
+  lazy val scrollerLayerDecl: Parser[DeclTree] =
+    identifier ~ ("=" ~> "new" ~> "ScrollComponent" ~> parameterBody) ^^ ScrollerLayerDecl
+
   lazy val framerPageDecl: Parser[DeclTree] =
-    identifier ~ ("=" ~> "new" ~> ("PageComponent"| "ScrollComponent" ) ~> parameterBody) ^^ PageDecl
+    identifier ~ ("=" ~> "new" ~> ("PageComponent" ) ~> parameterBody) ^^ PageDecl
 
   lazy val snapToDecl: Parser[DeclTree] =
     identifier ~ ("." ~> "snapToPage" ~> "(" ~> identifier <~ ")") ^^ SnapToIdent

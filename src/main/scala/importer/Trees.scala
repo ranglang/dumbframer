@@ -203,6 +203,7 @@ object Trees {
 
   case class WidthDecl(value: String) extends DeclTree
   case class LayerDecl(name: Ident, members: List[TermTree]) extends DeclTree
+  case class ScrollerLayerDecl(name: Ident, members: List[TermTree]) extends DeclTree
   case class PageDecl(name: Ident, members: List[TermTree]) extends DeclTree
   case class NotSupportedDecl(name: String) extends DeclTree
   sealed trait Literal extends TermTree

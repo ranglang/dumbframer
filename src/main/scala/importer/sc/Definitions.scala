@@ -79,6 +79,10 @@ case class NotSupportSymbol(nme: Name, value: String) extends Symbol(nme) {
 }
 case class LayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer(), parentOpt: Option[String]) extends Symbol(nme) {
 }
+
+case class ScrollerLayerSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer(), parentOpt: Option[String]) extends Symbol(nme) {
+}
+
 case class PageSymbol(nme: Name, params: List[TermTree], members: ListBuffer[Symbol] = ListBuffer()) extends Symbol(nme) {
 }
 

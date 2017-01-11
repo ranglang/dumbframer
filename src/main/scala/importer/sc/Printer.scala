@@ -24,6 +24,11 @@ object Printer {
   }
   private implicit val self = this
 
+  def isHtml(list: List[TermTree]):Boolean = {
+
+    
+  }
+
   final def params2CssStringVnode(list1: List[TermTree], head1: String)(implicit framer: FramerConfig): String = {
     val head = "style: {" ;
     val ifResponsive = !framer.selectedHand.isEmpty;
@@ -31,6 +36,7 @@ object Printer {
       case "apple-iphone-5c-white" => 640
       case _ => 600
     }
+
 
     // width_ident
     val list2:List[TermTree] = list1.collectFirst {
@@ -129,8 +135,8 @@ object Printer {
 
 
     def getPosition(): String = {
-      if(!isRelative) "position: \"absolute\","
-      else "position: \"relative,\" "
+//      if(!isRelative) "position: \"absolute\","
+       "position: \"relative\", "
     }
 
     def getDisplay(): String = {
@@ -383,8 +389,8 @@ object Printer {
 
 
     def getPosition(): String = {
-      if(!isRelative) "position: absolute;\n"
-      else "position: relative;\n"
+//      if(!isRelative) "position: absolute;\n"
+       "position: relative;\n"
     }
 
     def getDisplay(): String = {
@@ -487,8 +493,6 @@ object Printer {
         case BorderRadiusIdent(v@StringIdent(value)) =>
           if(ifResponsive) result + "border-radius: " + value.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "border-radius: " + value + "px;\n"
-//        case StyleTextAlignIdent(v) =>
-//          result + "text-align: " + v + ";\n"
         case LineHeightIdent(v) =>
           if(ifResponsive) result + "line-height: " + v.toDouble / SCREEN_WIDTH  + "rem;\n" else
           result + "line-height: " + v + "px;\n"
@@ -559,16 +563,8 @@ object Printer {
                 }
               case layer: ImageSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html + printTab(current)+ "<img class=\"" + layer.name.name + "\"" + "src=\""+ transformUrl(layer.imageUrl,framerConfig.projectId) + "\" />\n",
-//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "img(\"."+layer.name.name+"\",{"+" props: { src: \""+layer.imageUrl+"\"},"+params2CssStringVnode(layer.params,"")+"})\n",
                   params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
-//              case layer: InputSymbol =>
-//                val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
-//                factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "<input type=\""+layer.inputType + "\" placeHolder=\""+layer.value + "\"  class=\"" + layer.name.name + "\" />\n" +
-//                  printTab(current-1) +
-//                  "</div>\n",
-//                  params2CssString(layer.params, parseResult.css + parent + " ." ++ layer.name.name + "{" + "\n") + "}\n"))
               case layer: InputSymbol =>
                 val parent = layer.parentOpt.map(s => "." + s + " > ").getOrElse("")
                 factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +printTab(current)+ "input(\"."+layer.name.name+"\",{"+" props: { type: \""+layer.inputType+"\", placeHolder: \""+layer.value+"\",},"+params2CssStringVnode(layer.params,"")+"})\n",
@@ -582,8 +578,7 @@ object Printer {
                 layer.members.isEmpty match {
                   case true =>
                     factorialAcc(current - 1, hashMap, ParseResult(parseResult.html +
-                      printTab(current) +"div(\"."+layer.name.name+"\",{"+params2CssStringVnode(layer.params,"")+"},[])\n",
-//                       "<div class=\"" + layer.name.name + "\"></div>\n"+ printTab(current-1)+ "</div>\n",
+                      printTab(current) +"div(\"."+layer.name.name+"\",{"+params2CssStringVnode(layer.params,"")+"},[]),\n",
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                   case false =>
                     val s = mutable.Stack(layer.members: _*)
@@ -639,13 +634,13 @@ object Printer {
                 layer.members.isEmpty match {
                   case true =>
                     factorialAcc(current, hashMap, ParseResult(parseResult.html +printTab(current)+
-                      "div(\"."+layer.name.name+"\",{},[])\n",
+                      "div(\"."+layer.name.name+"\",{"+params2CssStringVnode(layer.params,"")+"},[]),\n",
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                   case false =>
                     val s = mutable.Stack(layer.members: _*)
                     val nh = hashMap.+=((current + 1, s))
                     factorialAcc(current + 1, nh, ParseResult(parseResult.html +printTab(current)+
-                      "div(\"."+layer.name.name+"\", {},[])\n",
+                      "div(\"."+layer.name.name+"\", {"+params2CssStringVnode(layer.params,"")+"},[\n",
                       params2CssString(layer.params, parseResult.css + parent + "." ++ layer.name.name + "{" + "\n") + "}\n"))
                 }
 //              case layer: PageSymbol =>
