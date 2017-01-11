@@ -23,3 +23,5 @@ RUN sbt package:dist
 RUN unzip target/universal/dumframer-1.0.zip
 EXPOSE 9000
 ENTRYPOINT ["./dumframer-1.0/bin/dumframer"]
+
+//curl 114.67.29.141:4000
