@@ -75,12 +75,13 @@ object Printer {
 
     val isRelative:Boolean =
       list.collectFirst {
-        case  XIdent(v @Value3Ident(pos,optCal,optStr)) if optCal == Some("pos") => v
-        case  YIdent(v @Value3Ident(pos,optCal,optStr))if optCal == Some("pos") => v
-      } match {
-        case Some(ident) => true
-        case None =>  false
-      }
+        case  XIdent(v @Value3Ident(pos,optCal,optStr))  => v
+        case  YIdent(v @Value3Ident(pos,optCal,optStr)) => v
+      }.isDefined
+//      match {
+//        case Some(ident) => true
+//        case None =>  false
+//      }
 
     val isText:Boolean = list.collectFirst {
       case  HtmlIdent(str) => str
@@ -328,8 +329,8 @@ object Printer {
 
     val isRelative:Boolean =
           list.collectFirst {
-      case  XIdent(v @Value3Ident(pos,optCal,optStr)) if optCal == Some("pos") => v
-      case  YIdent(v @Value3Ident(pos,optCal,optStr))if optCal == Some("pos") => v
+            case  XIdent(v @Value3Ident(pos,optCal,optStr)) => v
+            case  YIdent(v @Value3Ident(pos,optCal,optStr))=> v
     } match {
       case Some(ident) => true
       case None =>  false

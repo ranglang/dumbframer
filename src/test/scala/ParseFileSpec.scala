@@ -50,6 +50,13 @@ class ParseFileSpec
 //
 //
   "FramerCongfig" should {
+    "should paser test " in {
+      val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/bottom.coffee")))
+      val c = new PagedSeqReader(reader);
+      val result = FramerParser.parse(c, FramerConfig("apple-iphone-5s-gold", ""))
+      //      result.html.split("div") should (have(length(5)))
+//            result.css shouldBe ""
+    }
     "should paser test one layer" in {
       val reader = PagedSeq.fromReader(new InputStreamReader(new FileInputStream("src/main/resources/testonelayer.coffee")))
       val c = new PagedSeqReader(reader);
