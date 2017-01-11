@@ -47,16 +47,16 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     Marshal(formData).to[RequestEntity]
   }
 
-  "Service" should "test file vnode" in {
-    val a = createEntity(new File("src/main/resources/test1.coffee")).map(entity => {
-      Post(s"/uploadVnode", entity) ~> routes ~> check {
-        status shouldBe OK
-//        responseAs[String] shouldBe ""
-//          (include("html"))
-      }
-    })
-    Await.result(a, 100.seconds)
-  }
+//  "Service" should "test file vnode" in {
+//    val a = createEntity(new File("src/main/resources/test1.coffee")).map(entity => {
+//      Post(s"/uploadVnode", entity) ~> routes ~> check {
+//        status shouldBe OK
+////        responseAs[String] shouldBe ""
+////          (include("html"))
+//      }
+//    })
+//    Await.result(a, 100.seconds)
+//  }
 
 //  "Service" should "test zip upload" in {
 //    val a = createEntity(new File("src/main/resources/Archive.zip")).map(entity => {
